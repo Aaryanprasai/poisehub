@@ -27,28 +27,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
 
 function AppContent() {
-  const [user, setUser] = useState(null);
   const { currentUser } = useAuth();
-
-  useEffect(() => {
-    // Simulate fetching user data or setting it after login
-    if (currentUser) {
-      // Replace with actual user data fetching logic
-      setUser({
-        id: currentUser.id,
-        name: currentUser.name || 'Test User',
-        email: currentUser.email || 'test@example.com',
-        avatar: currentUser.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=test',
-        phoneNumber: currentUser.phoneNumber || '+1234567890',
-        twoFactorEnabled: currentUser.twoFactorEnabled || false,
-        role: currentUser.role || 'artist',
-        createdAt: currentUser.createdAt || new Date().toISOString(),
-        verificationStatus: currentUser.verificationStatus || 'verified',
-      });
-    } else {
-      setUser(null);
-    }
-  }, [currentUser]);
 
   return (
     <Routes>
@@ -61,7 +40,7 @@ function AppContent() {
 
       {/* User Routes */}
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-      <Route path="/profile" element={<PrivateRoute><Profile user={user} /></PrivateRoute>} />
+      <Route path="/profile" element={<PrivateRoute><Profile user={currentUser} /></PrivateRoute>} />
       <Route path="/update-profile" element={<PrivateRoute><UpdateProfile /></PrivateRoute>} />
       <Route path="/upload" element={<PrivateRoute><Upload /></PrivateRoute>} />
       <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
@@ -69,20 +48,18 @@ function AppContent() {
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/*" element={
-        <AdminProtectedRoute user={user}>
-          <AdminProvider user={user} setUser={setUser}>
-            <Routes>
-              <Route path="/dashboard" element={<AdminDashboard />} />
-              <Route path="/users" element={<AdminUsers />} />
-              <Route path="/tracks" element={<AdminTracks />} />
-              <Route path="/create-admin" element={<AdminCreate />} />
-              <Route path="/platforms-settings" element={<AdminPlatformsSettings />} />
-              <Route path="/tickets" element={<AdminTickets />} />
-              <Route path="/royalties" element={<AdminRoyalties />} />
-              <Route path="/deletion-requests" element={<AdminDeletionRequests />} />
-              <Route path="/settings" element={<AdminSettings />} />
-            </Routes>
-          </AdminProvider>
+        <AdminProtectedRoute>
+          <Routes>
+            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/users" element={<AdminUsers />} />
+            <Route path="/tracks" element={<AdminTracks />} />
+            <Route path="/create-admin" element={<AdminCreate />} />
+            <Route path="/platforms-settings" element={<AdminPlatformsSettings />} />
+            <Route path="/tickets" element={<AdminTickets />} />
+            <Route path="/royalties" element={<AdminRoyalties />} />
+            <Route path="/deletion-requests" element={<AdminDeletionRequests />} />
+            <Route path="/settings" element={<AdminSettings />} />
+          </Routes>
         </AdminProtectedRoute>
       } />
     </Routes>

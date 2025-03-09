@@ -74,7 +74,7 @@ export function AdminLoginForm() {
     try {
       await verifyAdminOTP(data.otp);
       toast.success('Login successful!');
-      navigate('/admin/dashboard');
+      // The useEffect above will handle the redirect
     } catch (error) {
       console.error('OTP error:', error);
       toast.error('Invalid OTP code');

@@ -2,17 +2,15 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { User } from '@/lib/types';
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;
-  user: User | null;
 }
 
-const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children, user }) => {
-  const { isAdmin } = useAuth();
+const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) => {
+  const { isAuthenticated, isAdmin } = useAuth();
 
-  if (!user || !isAdmin()) {
+  if (!isAuthenticated || !isAdmin()) {
     return <Navigate to="/admin" replace />;
   }
 

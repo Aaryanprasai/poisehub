@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useUserContext, UserProvider } from './UserContext';
 import { useAdminContext, AdminProvider } from './AdminContext';
@@ -14,7 +15,7 @@ const INACTIVITY_TIMEOUT = 10 * 60 * 1000;
 // Define the core authentication context
 interface AuthContextType {
   user: User | null;
-  currentUser: User | null; // Added currentUser to match what App.tsx expects
+  currentUser: User | null;
   isAuthenticated: boolean;
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -140,8 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // In a real app, we would verify the OTP
       // For demo, we'll accept any 6-digit OTP
       if (otp.length === 6 && /^\d+$/.test(otp)) {
-        setAdminOTPRequired(false);
-        setUser({
+        const adminUser = {
           id: 'admin1',
           name: 'Poise Admin',
           email: adminLoginEmail + '@poisemusic.com',
@@ -151,7 +151,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: adminLoginEmail === 'poise' ? 'superadmin' : 'admin',
           createdAt: new Date().toISOString(),
           verificationStatus: 'verified',
-        } as User);
+        } as User;
+        
+        setUser(adminUser);
+        setAdminOTPRequired(false);
       } else {
         throw new Error('Invalid OTP');
       }
