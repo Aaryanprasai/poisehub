@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
 import { User, DistributionService } from '@/lib/types';
 import { distributionPlatforms as initialPlatforms } from '@/components/upload/constants';
@@ -8,10 +7,13 @@ interface CodeGenerationSettings {
     autoGenerate: boolean;
     countryCode: string;
     registrantCode: string;
+    yearDigits: string;
+    lastSerialNumber: number;
   };
   upc: {
     autoGenerate: boolean;
     prefix: string;
+    lastSerialNumber: number;
   };
 }
 
@@ -26,6 +28,10 @@ interface AdminContextType {
   updateCodeGenerationSettings: (settings: CodeGenerationSettings) => void;
   generateISRC: () => string;
   generateUPC: () => string;
+  bulkGenerateISRC: (count: number) => string[];
+  bulkGenerateUPC: (count: number) => string[];
+  validateISRC: (isrc: string) => boolean;
+  validateUPC: (upc: string) => boolean;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -44,11 +50,14 @@ export function AdminProvider({ children, user, setUser }: AdminProviderProps) {
     isrc: {
       autoGenerate: true,
       countryCode: 'US',
-      registrantCode: 'POI'
+      registrantCode: 'POI',
+      yearDigits: new Date().getFullYear().toString().substring(2), // Last 2 digits of current year
+      lastSerialNumber: 0
     },
     upc: {
       autoGenerate: true,
-      prefix: '12345'
+      prefix: '12345',
+      lastSerialNumber: 0
     }
   });
 
@@ -97,37 +106,133 @@ export function AdminProvider({ children, user, setUser }: AdminProviderProps) {
     }
   };
 
-  // ISRC code generation function
+  // Enhanced ISRC code generation function with serial number tracking
   const generateISRC = (): string => {
     if (!codeGenerationSettings.isrc.autoGenerate) {
       return '';
     }
     
-    const prefix = codeGenerationSettings.isrc.countryCode + codeGenerationSettings.isrc.registrantCode;
-    const year = new Date().getFullYear().toString().substring(2); // Get last 2 digits of year
-    const random = Math.floor(Math.random() * 10000).toString().padStart(5, '0');
+    // Increment the last used serial number
+    const nextSerialNumber = codeGenerationSettings.isrc.lastSerialNumber + 1;
     
-    return `${prefix}${year}${random}`;
+    // Format serial part to be 5 digits with leading zeros
+    const serialPart = nextSerialNumber.toString().padStart(5, '0');
+    
+    // Construct ISRC: CountryCode + RegistrantCode + YearDigits + SerialNumber
+    const isrc = `${codeGenerationSettings.isrc.countryCode}${codeGenerationSettings.isrc.registrantCode}${codeGenerationSettings.isrc.yearDigits}${serialPart}`;
+    
+    // Update last serial number in state
+    setCodeGenerationSettings({
+      ...codeGenerationSettings,
+      isrc: {
+        ...codeGenerationSettings.isrc,
+        lastSerialNumber: nextSerialNumber
+      }
+    });
+    
+    return isrc;
   };
 
-  // UPC code generation function
+  // Enhanced UPC code generation with check digit calculation and serial tracking
   const generateUPC = (): string => {
     if (!codeGenerationSettings.upc.autoGenerate) {
       return '';
     }
     
+    // Increment the last used serial number
+    const nextSerialNumber = codeGenerationSettings.upc.lastSerialNumber + 1;
+    
+    // Format serial to be 5 digits with leading zeros
+    const serialPart = nextSerialNumber.toString().padStart(5, '0');
+    
     const prefix = codeGenerationSettings.upc.prefix;
-    const random = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+    // 12-digit UPC: Prefix (5) + Serial (5) + Random (1) + Check digit (1)
+    const random = Math.floor(Math.random() * 10).toString();
+    const upcWithoutCheck = `${prefix}${serialPart}${random}`;
     
-    // Simple check digit calculation
-    const digits = (prefix + random).split('').map(Number);
-    let sum = 0;
+    // Calculate check digit
+    const digits = upcWithoutCheck.split('').map(Number);
+    let oddSum = 0;
+    let evenSum = 0;
+    
     for (let i = 0; i < digits.length; i++) {
-      sum += i % 2 === 0 ? digits[i] * 3 : digits[i];
+      if (i % 2 === 0) {
+        oddSum += digits[i] * 3;
+      } else {
+        evenSum += digits[i];
+      }
     }
-    const checkDigit = (10 - (sum % 10)) % 10;
     
-    return `${prefix}${random}${checkDigit}`;
+    const totalSum = oddSum + evenSum;
+    const checkDigit = (10 - (totalSum % 10)) % 10;
+    
+    const upc = `${upcWithoutCheck}${checkDigit}`;
+    
+    // Update last serial number in state
+    setCodeGenerationSettings({
+      ...codeGenerationSettings,
+      upc: {
+        ...codeGenerationSettings.upc,
+        lastSerialNumber: nextSerialNumber
+      }
+    });
+    
+    return upc;
+  };
+
+  // Bulk generation functions for batch operations
+  const bulkGenerateISRC = (count: number): string[] => {
+    const isrcs: string[] = [];
+    for (let i = 0; i < count; i++) {
+      isrcs.push(generateISRC());
+    }
+    return isrcs;
+  };
+
+  const bulkGenerateUPC = (count: number): string[] => {
+    const upcs: string[] = [];
+    for (let i = 0; i < count; i++) {
+      upcs.push(generateUPC());
+    }
+    return upcs;
+  };
+
+  // Validation functions
+  const validateISRC = (isrc: string): boolean => {
+    // ISRC format: CC-XXX-YY-NNNNN
+    // CC: Country Code (2 chars)
+    // XXX: Registrant Code (3 chars)
+    // YY: Year (2 digits)
+    // NNNNN: Serial Number (5 digits)
+    const isrcRegex = /^[A-Z]{2}[A-Z0-9]{3}\d{2}\d{5}$/;
+    return isrcRegex.test(isrc);
+  };
+
+  const validateUPC = (upc: string): boolean => {
+    // Basic UPC-A format check (12 digits)
+    if (!/^\d{12}$/.test(upc)) {
+      return false;
+    }
+    
+    // Check digit validation
+    const digits = upc.split('').map(Number);
+    const checkDigit = digits.pop();
+    
+    let oddSum = 0;
+    let evenSum = 0;
+    
+    for (let i = 0; i < digits.length; i++) {
+      if (i % 2 === 0) {
+        oddSum += digits[i] * 3;
+      } else {
+        evenSum += digits[i];
+      }
+    }
+    
+    const totalSum = oddSum + evenSum;
+    const calculatedCheckDigit = (10 - (totalSum % 10)) % 10;
+    
+    return checkDigit === calculatedCheckDigit;
   };
 
   // Add new platform
@@ -157,7 +262,11 @@ export function AdminProvider({ children, user, setUser }: AdminProviderProps) {
         codeGenerationSettings,
         updateCodeGenerationSettings,
         generateISRC,
-        generateUPC
+        generateUPC,
+        bulkGenerateISRC,
+        bulkGenerateUPC,
+        validateISRC,
+        validateUPC
       }}
     >
       {children}
