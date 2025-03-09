@@ -2,15 +2,14 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-extensions/Card';
 import { Button } from '@/components/ui-extensions/Button';
-import { Navbar } from '@/components/Navbar';
 import { RoyaltyChart } from '@/components/RoyaltyChart';
 import { TrackCard } from '@/components/TrackCard';
 import { UploadForm } from '@/components/UploadForm';
-import { tracks, royaltyData, currentUser } from '@/lib/mock-data';
+import { tracks, royaltyData } from '@/lib/mock-data';
 import { ArrowRight, Plus, Music, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function Dashboard() {
+const Dashboard = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   // Filter tracks by status
@@ -23,13 +22,25 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border bg-background/80 backdrop-blur-md z-50">
+        <div className="container flex h-full items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Music className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-bold">Beat Echo</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm">Support</Button>
+            <Button variant="ghost" size="sm">Settings</Button>
+            <Button variant="outline" size="sm" onClick={() => window.location.href = "/"}>Logout</Button>
+          </div>
+        </div>
+      </nav>
       
-      <main className="lg:pl-64 pt-16 lg:pt-0 animate-fade-in">
+      <main className="pt-16 animate-fade-in">
         <div className="container p-4 md:p-6 max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Welcome back, {currentUser.name}</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
               <p className="text-muted-foreground">Manage your music distribution all in one place</p>
             </div>
             <Button 
@@ -100,7 +111,7 @@ export default function Dashboard() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Recent Tracks</h2>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm">
                 <Link to="/tracks" className="flex items-center gap-1">
                   View all <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
@@ -123,7 +134,7 @@ export default function Dashboard() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Royalty Overview</h2>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm">
                 <Link to="/royalties" className="flex items-center gap-1">
                   View detailed report <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
@@ -139,4 +150,6 @@ export default function Dashboard() {
       <UploadForm open={uploadDialogOpen} onOpenChange={setUploadDialogOpen} />
     </div>
   );
-}
+};
+
+export default Dashboard;

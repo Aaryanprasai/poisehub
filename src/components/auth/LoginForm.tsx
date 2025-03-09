@@ -15,9 +15,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
+import { Separator } from '@/components/ui/separator';
+import { Google } from 'lucide-react';
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  emailOrUsername: z.string().min(1, 'Email or username is required'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
@@ -29,12 +31,13 @@ interface LoginFormProps {
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isGoogleLoggingIn, setIsGoogleLoggingIn] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      emailOrUsername: '',
       password: '',
     },
   });
@@ -49,58 +52,91 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       toast.success('Login successful!');
       navigate('/dashboard');
       if (onSuccess) {
-        onSuccess(values.email);
+        onSuccess(values.emailOrUsername);
+      }
+    }, 1500);
+  };
+
+  const handleGoogleLogin = () => {
+    setIsGoogleLoggingIn(true);
+    
+    // Simulate Google login delay
+    setTimeout(() => {
+      console.log('Google Login');
+      setIsGoogleLoggingIn(false);
+      toast.success('Google login successful!');
+      navigate('/dashboard');
+      if (onSuccess) {
+        onSuccess('google-user@example.com');
       }
     }, 1500);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="your.email@example.com"
-                  type="email"
-                  autoComplete="email"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="••••••••"
-                  type="password"
-                  autoComplete="current-password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button 
-          type="submit" 
-          className="w-full" 
-          isLoading={isLoggingIn}
-        >
-          Sign In
-        </Button>
-      </form>
-    </Form>
+    <div className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="emailOrUsername"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email or Username</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="your.email@example.com or username"
+                    autoComplete="email"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="••••••••"
+                    type="password"
+                    autoComplete="current-password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button 
+            type="submit" 
+            className="w-full" 
+            isLoading={isLoggingIn}
+          >
+            Sign In
+          </Button>
+        </form>
+      </Form>
+      
+      <div className="flex items-center">
+        <Separator className="flex-grow" />
+        <span className="px-3 text-xs text-muted-foreground">OR</span>
+        <Separator className="flex-grow" />
+      </div>
+      
+      <Button 
+        type="button" 
+        variant="outline" 
+        className="w-full border-gray-300 hover:bg-gray-50"
+        onClick={handleGoogleLogin}
+        isLoading={isGoogleLoggingIn}
+        leftIcon={<Google className="h-4 w-4" />}
+      >
+        Continue with Google
+      </Button>
+    </div>
   );
 }
