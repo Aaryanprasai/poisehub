@@ -8,9 +8,22 @@ interface AdminProtectedRouteProps {
 }
 
 const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) => {
-  // Authentication is completely disabled
-  // This will simply render the children without any auth checks
+  const { user } = useAuth();
+  
+  // For now, we'll completely bypass authentication
+  // In a production app, we would check if user exists and has admin/superadmin role
   return <>{children}</>;
+  
+  // Commented out the actual authentication logic for now
+  // if (!user) {
+  //   return <Navigate to="/admin" replace />;
+  // }
+  
+  // if (user.role !== 'admin' && user.role !== 'superadmin') {
+  //   return <Navigate to="/admin" replace />;
+  // }
+  
+  // return <>{children}</>;
 };
 
 export default AdminProtectedRoute;
