@@ -13,7 +13,7 @@ export default function AdminLogin() {
               alt="Poise Logo" 
               className="h-10 w-auto"
             />
-            <h1 className="text-3xl font-bold tracking-tight text-white">Beat Echo</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-white">Poise</h1>
           </div>
         </div>
 
