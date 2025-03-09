@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface RegistrationConfig {
   publicRegistrationEnabled: boolean;
@@ -19,10 +19,29 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
     inviteOnlyMode: false
   });
 
+  // Ensure invite-only mode is enabled when public registration is disabled
+  useEffect(() => {
+    if (!registrationConfig.publicRegistrationEnabled && !registrationConfig.inviteOnlyMode) {
+      setRegistrationConfig(prev => ({
+        ...prev,
+        inviteOnlyMode: true
+      }));
+    }
+  }, [registrationConfig.publicRegistrationEnabled]);
+
   const updateRegistrationConfig = (config: Partial<RegistrationConfig>) => {
-    setRegistrationConfig({
-      ...registrationConfig,
-      ...config
+    setRegistrationConfig(prevConfig => {
+      const newConfig = {
+        ...prevConfig,
+        ...config
+      };
+      
+      // If public registration is disabled, force invite-only to be true
+      if (!newConfig.publicRegistrationEnabled) {
+        newConfig.inviteOnlyMode = true;
+      }
+      
+      return newConfig;
     });
   };
 
