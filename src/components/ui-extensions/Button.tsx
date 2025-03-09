@@ -8,15 +8,18 @@ interface ButtonProps extends React.ComponentProps<typeof ShadcnButton> {
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  pulseEffect?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, children, isLoading, leftIcon, rightIcon, disabled, ...props }, ref) => {
+  ({ className, children, isLoading, leftIcon, rightIcon, pulseEffect, disabled, ...props }, ref) => {
     return (
       <ShadcnButton
         className={cn(
-          'relative transition-all duration-200 active:scale-[0.98]',
+          'relative transition-all duration-300 active:scale-[0.98]',
           isLoading && 'pointer-events-none',
+          pulseEffect && 'animate-pulse-slow',
+          'hover:shadow-md hover:shadow-black/5 dark:hover:shadow-white/5',
           className
         )}
         disabled={isLoading || disabled}
@@ -29,9 +32,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </span>
         )}
         <span className={cn('flex items-center gap-2', isLoading && 'opacity-0')}>
-          {leftIcon && <span>{leftIcon}</span>}
+          {leftIcon && <span className="transition-transform duration-300 group-hover:translate-x-0.5">{leftIcon}</span>}
           {children}
-          {rightIcon && <span>{rightIcon}</span>}
+          {rightIcon && <span className="transition-transform duration-300 group-hover:translate-x-0.5">{rightIcon}</span>}
         </span>
       </ShadcnButton>
     );

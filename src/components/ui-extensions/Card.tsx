@@ -6,17 +6,19 @@ import { Card as ShadcnCard, CardContent, CardDescription, CardFooter, CardHeade
 interface CardProps extends React.ComponentProps<typeof ShadcnCard> {
   hoverEffect?: boolean;
   glassEffect?: boolean;
+  pulseEffect?: boolean;
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, hoverEffect, glassEffect, ...props }, ref) => {
+  ({ className, hoverEffect, glassEffect, pulseEffect, ...props }, ref) => {
     return (
       <ShadcnCard
         ref={ref}
         className={cn(
-          "transition-all duration-200",
-          hoverEffect && "hover:shadow-md hover:-translate-y-1",
-          glassEffect && "glass-card",
+          "border-border bg-white dark:bg-black transition-all duration-300",
+          hoverEffect && "hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-white/5 hover:-translate-y-1",
+          glassEffect && "bg-white/90 dark:bg-black/90 backdrop-blur-sm border-white/20 dark:border-black/20 shadow-sm",
+          pulseEffect && "animate-pulse-slow",
           className
         )}
         {...props}
