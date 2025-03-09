@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAdminContext } from '@/contexts/AdminContext';
 import { toast } from 'sonner';
 import { Lock, Shield, LogIn } from 'lucide-react';
 
@@ -26,7 +26,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type OtpFormValues = z.infer<typeof otpSchema>;
 
 export function AdminLoginForm() {
-  const { adminLogin, verifyAdminOTP, adminOTPRequired } = useAuth();
+  const { adminLogin, verifyAdminOTP, adminOTPRequired } = useAdminContext();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
@@ -87,12 +87,13 @@ export function AdminLoginForm() {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel className="text-white">Username</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Enter your admin username" 
                       {...field} 
                       disabled={isLoading}
+                      className="bg-slate-800 border-slate-700 text-white"
                     />
                   </FormControl>
                   <FormMessage />
@@ -104,13 +105,14 @@ export function AdminLoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-white">Password</FormLabel>
                   <FormControl>
                     <Input 
                       type="password" 
                       placeholder="Enter your password" 
                       {...field} 
                       disabled={isLoading}
+                      className="bg-slate-800 border-slate-700 text-white"
                     />
                   </FormControl>
                   <FormMessage />
@@ -119,7 +121,7 @@ export function AdminLoginForm() {
             />
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-white text-black hover:bg-gray-200" 
               disabled={isLoading}
               leftIcon={<LogIn className="h-4 w-4" />}
             >
@@ -132,11 +134,11 @@ export function AdminLoginForm() {
         <Form {...otpForm}>
           <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-4">
             <div className="flex justify-center mb-4">
-              <Shield className="h-12 w-12 text-primary" />
+              <Shield className="h-12 w-12 text-white" />
             </div>
             <div className="text-center mb-4">
-              <h3 className="text-lg font-medium">Two-Factor Authentication</h3>
-              <p className="text-muted-foreground text-sm">
+              <h3 className="text-lg font-medium text-white">Two-Factor Authentication</h3>
+              <p className="text-slate-400 text-sm">
                 Enter the 6-digit code sent to your registered device
               </p>
             </div>
@@ -151,7 +153,7 @@ export function AdminLoginForm() {
                       {...field} 
                       disabled={isLoading}
                       maxLength={6}
-                      className="text-center text-xl tracking-widest"
+                      className="text-center text-xl tracking-widest bg-slate-800 border-slate-700 text-white"
                     />
                   </FormControl>
                   <FormMessage />
@@ -160,7 +162,7 @@ export function AdminLoginForm() {
             />
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-white text-black hover:bg-gray-200" 
               disabled={isLoading}
               leftIcon={<Lock className="h-4 w-4" />}
             >

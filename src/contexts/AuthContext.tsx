@@ -38,7 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: 'artist',
       createdAt: new Date().toISOString(),
       verificationStatus: 'unverified',
-      hasReleases: true
+      hasReleases: true,
+      idType: 'personal'
     } as User);
   };
 
@@ -86,11 +87,12 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   
-  // Combine all contexts
+  // Get other contexts
   const userContext = useUserContext();
   const adminContext = useAdminContext();
   const registrationContext = useRegistrationContext();
   
+  // Merge all contexts
   return {
     ...context,
     ...userContext,
