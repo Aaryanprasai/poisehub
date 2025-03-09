@@ -28,3 +28,17 @@ export const adminLogin = async (username: string, password: string) => {
     throw error;
   }
 };
+
+// Call the admin password reset edge function
+export const requestAdminPasswordReset = async (email: string) => {
+  try {
+    const response = await supabase.functions.invoke('admin-reset-password', {
+      body: { email },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Admin password reset error:', error);
+    throw error;
+  }
+};

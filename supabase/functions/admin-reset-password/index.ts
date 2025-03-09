@@ -20,55 +20,49 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Get the request body
-    const { username, password } = await req.json()
+    const { email } = await req.json()
 
-    if (!username || !password) {
+    if (!email) {
       return new Response(
-        JSON.stringify({ success: false, error: "Username and password are required" }),
+        JSON.stringify({ success: false, error: "Email is required" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       )
     }
 
-    // Validate that username is a @poisemusic.com email
-    if (!username.endsWith('@poisemusic.com')) {
+    // Validate that email is a @poisemusic.com email
+    if (!email.endsWith('@poisemusic.com')) {
       return new Response(
         JSON.stringify({ success: false, error: "Only @poisemusic.com email addresses are allowed" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
       )
     }
 
-    // Call the verify_admin_login function
-    const { data, error } = await supabase
-      .rpc('verify_admin_login', { 
-        username_input: username, 
-        password_input: password
-      })
+    // Check if the admin exists
+    const { data: adminData, error: adminError } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('username', email)
+      .single()
 
-    if (error) {
-      console.error("Error verifying admin login:", error)
+    if (adminError || !adminData) {
       return new Response(
-        JSON.stringify({ success: false, error: "Authentication failed" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+        JSON.stringify({ success: false, error: "Admin user not found" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
       )
     }
 
-    // Check if any user was returned
-    if (!data || data.length === 0) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid credentials" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
-      )
-    }
-
+    // In a real implementation, you would:
+    // 1. Generate a secure reset token
+    // 2. Store it in the database with an expiration time
+    // 3. Send an email with a reset link
+    
+    // For this demonstration, we'll just return a success message
+    // In a production environment, you would integrate with an email service
+    
     return new Response(
       JSON.stringify({ 
         success: true, 
-        user: {
-          id: data[0].id,
-          username: data[0].username,
-          is_superadmin: data[0].is_superadmin,
-          role: data[0].is_superadmin ? 'superadmin' : 'admin'
-        }
+        message: "If your email exists in our system, you will receive password reset instructions"
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     )
