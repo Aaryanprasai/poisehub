@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -12,6 +11,7 @@ import { AccountTypeSelection } from './AccountTypeSelection';
 import { PersonalIdUpload } from './PersonalIdUpload';
 import { BusinessDocumentsUpload } from './BusinessDocumentsUpload';
 import { toast } from 'sonner';
+import { User } from '@/contexts/AuthContext';
 
 // Maximum file size: 5MB
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -64,10 +64,7 @@ export const verificationSchema = z.object({
 export type VerificationValues = z.infer<typeof verificationSchema>;
 
 interface VerificationFormProps {
-  user: {
-    idType?: 'personal' | 'business' | null;
-    verificationStatus?: 'unverified' | 'pending' | 'verified' | 'rejected';
-  } | null;
+  user: User | null;
   uploadVerificationDocuments: (
     idType: 'personal' | 'business',
     idDocument: string, 
@@ -80,6 +77,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   user, 
   uploadVerificationDocuments 
 }) => {
+  
   const [personalIdFile, setPersonalIdFile] = useState<File | null>(null);
   const [businessDocFile, setBusinessDocFile] = useState<File | null>(null);
   const [taxDocFile, setTaxDocFile] = useState<File | null>(null);
@@ -88,7 +86,9 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   const form = useForm<VerificationValues>({
     resolver: zodResolver(verificationSchema),
     defaultValues: {
-      idType: user?.idType || 'personal',
+      idType: (user?.idType === 'personal' || user?.idType === 'business') 
+        ? user.idType 
+        : 'personal',
     },
   });
   
@@ -179,6 +179,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   };
 
   return (
+    
     <Card>
       <CardHeader>
         <CardTitle>Upload Verification Documents</CardTitle>
