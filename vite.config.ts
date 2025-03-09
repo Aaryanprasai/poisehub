@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -9,6 +10,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  base: "/", // This ensures assets are correctly loaded on your subdomain
   plugins: [
     react(),
     mode === 'development' &&
@@ -19,4 +21,8 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    outDir: "dist", // Output directory for production build
+    emptyOutDir: true, // Empty the output directory before building
+  }
 }));
