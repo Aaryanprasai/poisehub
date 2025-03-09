@@ -4,8 +4,6 @@ import { useUserContext, UserProvider } from './UserContext';
 import { useAdminContext, AdminProvider } from './AdminContext';
 import { useRegistrationContext, RegistrationProvider } from './RegistrationContext';
 import { User } from '@/lib/types';
-import { useUserAuth } from '@/auth/userAuth';
-import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 
 // Re-export the user type for convenience
 export type { User } from '@/lib/types';
@@ -13,8 +11,6 @@ export type { User } from '@/lib/types';
 // Define the core authentication context
 interface AuthContextType {
   user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  currentUser: User | null;
   isAuthenticated: boolean;
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -28,36 +24,47 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Combined provider that wraps all our context providers
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  
-  // User authentication hooks
-  const { login, logout, isAdmin: checkIsAdmin, isSuperAdmin: checkIsSuperAdmin } = useUserAuth(setUser);
-  
-  // Handler for inactivity timeout
-  const handleTimeout = () => {
-    logout();
+
+  const login = async (email: string, password: string): Promise<void> => {
+    // Mock login - in a real app, this would call an API
+    setUser({
+      id: '1',
+      name: 'Demo User',
+      email: email,
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo',
+      phoneNumber: '+1234567890',
+      twoFactorEnabled: false,
+      role: 'artist',
+      createdAt: new Date().toISOString(),
+      verificationStatus: 'unverified',
+      hasReleases: true
+    } as User);
   };
 
-  // Inactivity tracking
-  useInactivityTimeout(!!user, handleTimeout);
+  const logout = () => {
+    setUser(null);
+  };
 
-  // Wrapper functions to maintain the original API
-  const isAdmin = () => checkIsAdmin(user);
-  const isSuperAdmin = () => checkIsSuperAdmin(user);
+  const isAdmin = () => {
+    return user?.role === 'admin' || user?.role === 'superadmin';
+  };
 
-  const value = {
-    user,
-    setUser,
-    currentUser: user,
-    isAuthenticated: !!user,
-    isLoggedIn: !!user,
-    login,
-    logout,
-    isAdmin,
-    isSuperAdmin,
+  const isSuperAdmin = () => {
+    return user?.role === 'superadmin';
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoggedIn: !!user,
+        login,
+        logout,
+        isAdmin,
+        isSuperAdmin,
+      }}
+    >
       <UserProvider user={user} setUser={setUser}>
         <AdminProvider user={user} setUser={setUser}>
           <RegistrationProvider>
@@ -77,12 +84,11 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   
-  // Get other contexts
+  // Combine all contexts
   const userContext = useUserContext();
   const adminContext = useAdminContext();
   const registrationContext = useRegistrationContext();
   
-  // Merge all contexts
   return {
     ...context,
     ...userContext,

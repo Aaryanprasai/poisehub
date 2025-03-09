@@ -134,9 +134,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         </form>
       </Form>
       
-      <div className="relative flex items-center py-2">
+      <div className="flex items-center">
         <Separator className="flex-grow" />
-        <span className="px-3 text-xs text-muted-foreground absolute left-1/2 -translate-x-1/2 bg-white">OR</span>
+        <span className="px-3 text-xs text-muted-foreground">OR</span>
         <Separator className="flex-grow" />
       </div>
       

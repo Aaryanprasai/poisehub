@@ -4,11 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, RefreshCw } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormValues } from './types';
-import { useAdminContext } from '@/contexts/AdminContext';
-import { toast } from 'sonner';
 
 interface RightsFormProps {
   form: UseFormReturn<FormValues>;
@@ -18,92 +16,43 @@ interface RightsFormProps {
 
 export function RightsForm({ form, isSubmitting, onBack }: RightsFormProps) {
   const hasPublishingRights = form.watch('hasPublishingRights');
-  const { generateISRC, generateUPC, codeGenerationSettings } = useAdminContext();
-
-  const handleGenerateISRC = () => {
-    if (!codeGenerationSettings.isrc.autoGenerate) {
-      toast.error('ISRC auto-generation is disabled in admin settings');
-      return;
-    }
-    
-    const generatedISRC = generateISRC();
-    form.setValue('isrcCode', generatedISRC);
-    toast.success(`Generated ISRC: ${generatedISRC}`);
-  };
-
-  const handleGenerateUPC = () => {
-    if (!codeGenerationSettings.upc.autoGenerate) {
-      toast.error('UPC auto-generation is disabled in admin settings');
-      return;
-    }
-    
-    const generatedUPC = generateUPC();
-    form.setValue('upcCode', generatedUPC);
-    toast.success(`Generated UPC: ${generatedUPC}`);
-  };
 
   return (
     <>
       <div className="grid gap-6 sm:grid-cols-2">
-        <div>
-          <FormField
-            control={form.control}
-            name="upcCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>UPC Code (Optional)</FormLabel>
-                <div className="flex gap-2">
-                  <FormControl>
-                    <Input placeholder="Enter UPC if you have one" {...field} />
-                  </FormControl>
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleGenerateUPC}
-                    leftIcon={<RefreshCw className="h-4 w-4" />}
-                  >
-                    Generate
-                  </Button>
-                </div>
-                <FormDescription>
-                  Leave blank if you don't have one. We'll assign one for you.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="upcCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>UPC Code (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter UPC if you have one" {...field} />
+              </FormControl>
+              <FormDescription>
+                Leave blank if you don't have one. We'll assign one for you.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <div>
-          <FormField
-            control={form.control}
-            name="isrcCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ISRC Code (Optional)</FormLabel>
-                <div className="flex gap-2">
-                  <FormControl>
-                    <Input placeholder="Enter ISRC if you have one" {...field} />
-                  </FormControl>
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleGenerateISRC}
-                    leftIcon={<RefreshCw className="h-4 w-4" />}
-                  >
-                    Generate
-                  </Button>
-                </div>
-                <FormDescription>
-                  Leave blank if you don't have one. We'll assign one for you.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="isrcCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>ISRC Code (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter ISRC if you have one" {...field} />
+              </FormControl>
+              <FormDescription>
+                Leave blank if you don't have one. We'll assign one for you.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
       
       <FormField

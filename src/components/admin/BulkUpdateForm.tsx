@@ -2,11 +2,11 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-extensions/Card';
 import { Button } from '@/components/ui-extensions/Button';
-import { Upload } from 'lucide-react';
+import { FileSpreadsheet, Upload, AlertCircle, FileX, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { ReportTypeSelector, ReportType } from './ReportTypeSelector';
-import { FileUploader } from './FileUploader';
-import { UploadStatusAlert } from './UploadStatusAlert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+type ReportType = 'royalties' | 'sales' | 'streams';
 
 export function BulkUpdateForm() {
   const [isUploading, setIsUploading] = useState(false);
@@ -14,13 +14,25 @@ export function BulkUpdateForm() {
   const [selectedReportType, setSelectedReportType] = useState<ReportType>('royalties');
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
-  const handleReportTypeChange = (type: ReportType) => {
-    setSelectedReportType(type);
-    setUploadSuccess(false);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    
+    if (file) {
+      // Check if file is CSV or XLSX
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      
+      if (fileExt !== 'csv' && fileExt !== 'xlsx') {
+        toast.error('Invalid file format. Please upload a CSV or XLSX file.');
+        return;
+      }
+      
+      setSelectedFile(file);
+      setUploadSuccess(false);
+    }
   };
 
-  const handleFileChange = (file: File | null) => {
-    setSelectedFile(file);
+  const handleReportTypeChange = (type: ReportType) => {
+    setSelectedReportType(type);
     setUploadSuccess(false);
   };
 
@@ -49,6 +61,12 @@ export function BulkUpdateForm() {
     }
   };
 
+  const reportTypeOptions: {id: ReportType, label: string}[] = [
+    { id: 'royalties', label: 'Royalty Reports' },
+    { id: 'sales', label: 'Sales Reports' },
+    { id: 'streams', label: 'Streaming Data' }
+  ];
+
   return (
     <Card>
       <CardHeader>
@@ -58,22 +76,80 @@ export function BulkUpdateForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <ReportTypeSelector 
-          selectedReportType={selectedReportType} 
-          onChange={handleReportTypeChange} 
-        />
+        <div className="grid grid-cols-3 gap-4">
+          {reportTypeOptions.map((option) => (
+            <Button
+              key={option.id}
+              variant={selectedReportType === option.id ? "default" : "outline"}
+              className="justify-start h-auto py-4"
+              onClick={() => handleReportTypeChange(option.id)}
+            >
+              <FileSpreadsheet className="h-5 w-5 mr-2" />
+              {option.label}
+            </Button>
+          ))}
+        </div>
 
-        <FileUploader
-          selectedFile={selectedFile}
-          onFileChange={handleFileChange}
-          reportType={selectedReportType}
-        />
+        <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <FileSpreadsheet className="h-10 w-10 text-muted-foreground" />
+            <div className="space-y-2">
+              <h3 className="font-medium">Upload {selectedReportType} file</h3>
+              <p className="text-sm text-muted-foreground">
+                Drag and drop your .CSV or .XLSX file, or click to browse
+              </p>
+            </div>
+            <input
+              type="file"
+              id="file-upload"
+              className="hidden"
+              accept=".csv,.xlsx"
+              onChange={handleFileChange}
+            />
+            <label htmlFor="file-upload">
+              <Button variant="outline" className="cursor-pointer" asChild>
+                <span>Choose File</span>
+              </Button>
+            </label>
+          </div>
+          {selectedFile && (
+            <div className="mt-4 p-3 bg-muted rounded-md w-full flex justify-between items-center">
+              <div className="flex items-center">
+                <FileSpreadsheet className="h-5 w-5 mr-2 text-primary" />
+                <span className="text-sm font-medium">{selectedFile.name}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedFile(null)}
+              >
+                <FileX className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
 
-        <UploadStatusAlert
-          uploadSuccess={uploadSuccess}
-          selectedFile={selectedFile}
-          reportType={selectedReportType}
-        />
+        {selectedFile && (
+          <Alert className={uploadSuccess ? "bg-green-50 border-green-200" : ""}>
+            <div className="flex items-center gap-2">
+              {uploadSuccess ? (
+                <Check className="h-5 w-5 text-green-500" />
+              ) : (
+                <AlertCircle className="h-5 w-5" />
+              )}
+              <AlertTitle>
+                {uploadSuccess
+                  ? "File processed successfully"
+                  : "Ready to upload"}
+              </AlertTitle>
+            </div>
+            <AlertDescription>
+              {uploadSuccess
+                ? `The ${selectedReportType} data has been updated.`
+                : `Click the upload button to update ${selectedReportType} data.`}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Button
           className="w-full"

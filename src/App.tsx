@@ -1,73 +1,113 @@
 
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import ForgotPassword from './pages/ForgotPassword';
-import UpdateProfile from './pages/UpdateProfile';
-import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
-import Upload from './pages/Upload';
-import Support from './pages/Support';
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminTracks from './pages/admin/AdminTracks';
-import AdminCreate from './pages/admin/AdminCreate';
-import AdminPlatformsSettings from './pages/admin/AdminPlatformsSettings';
-import AdminTickets from './pages/admin/AdminTickets';
-import AdminRoyalties from './pages/admin/AdminRoyalties';
-import AdminDeletionRequests from './pages/admin/AdminDeletionRequests';
-import AdminSettings from './pages/admin/AdminSettings';
-import PrivateRoute from './components/PrivateRoute';
-import AdminProtectedRoute from './components/AdminProtectedRoute';
-import VerifyEmail from './pages/VerifyEmail';
-import ResetPassword from './pages/ResetPassword';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
+import Tracks from "./pages/Tracks";
+import Upload from "./pages/Upload";
+import Insights from "./pages/Insights";
+import Support from "./pages/Support";
+import Settings from "./pages/Settings";
+import Payments from "./pages/Payments"; 
+import NotFound from "./pages/NotFound";
+import VerificationPage from "./pages/VerificationPage";
 
-function AppContent() {
-  const { currentUser } = useAuth();
+// Admin pages
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminTracks from "./pages/admin/AdminTracks";
+import AdminCreate from "./pages/admin/AdminCreate";
 
-  return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+const queryClient = new QueryClient();
 
-      {/* User Routes */}
-      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-      <Route path="/profile" element={<PrivateRoute><Profile user={currentUser} /></PrivateRoute>} />
-      <Route path="/update-profile" element={<PrivateRoute><UpdateProfile /></PrivateRoute>} />
-      <Route path="/upload" element={<PrivateRoute><Upload /></PrivateRoute>} />
-      <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
-
-      {/* Admin Routes */}
-      <Route path="/admin" element={<AdminLogin />} />
-      <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-      <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
-      <Route path="/admin/tracks" element={<AdminProtectedRoute><AdminTracks /></AdminProtectedRoute>} />
-      <Route path="/admin/create-admin" element={<AdminProtectedRoute><AdminCreate /></AdminProtectedRoute>} />
-      <Route path="/admin/platforms-settings" element={<AdminProtectedRoute><AdminPlatformsSettings /></AdminProtectedRoute>} />
-      <Route path="/admin/tickets" element={<AdminProtectedRoute><AdminTickets /></AdminProtectedRoute>} />
-      <Route path="/admin/royalties" element={<AdminProtectedRoute><AdminRoyalties /></AdminProtectedRoute>} />
-      <Route path="/admin/deletion-requests" element={<AdminProtectedRoute><AdminDeletionRequests /></AdminProtectedRoute>} />
-      <Route path="/admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
-    </Routes>
-  );
-}
-
-function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </Router>
-  );
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/tracks" element={
+              <ProtectedRoute>
+                <Tracks />
+              </ProtectedRoute>
+            } />
+            <Route path="/upload" element={
+              <ProtectedRoute>
+                <Upload />
+              </ProtectedRoute>
+            } />
+            <Route path="/insights" element={
+              <ProtectedRoute>
+                <Insights />
+              </ProtectedRoute>
+            } />
+            <Route path="/support" element={
+              <ProtectedRoute>
+                <Support />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/payments" element={
+              <ProtectedRoute>
+                <Payments />
+              </ProtectedRoute>
+            } />
+            <Route path="/verification" element={
+              <ProtectedRoute>
+                <VerificationPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <ProtectedRoute>
+                <AdminUsers />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/tracks" element={
+              <ProtectedRoute>
+                <AdminTracks />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/create-admin" element={
+              <ProtectedRoute>
+                <AdminCreate />
+              </ProtectedRoute>
+            } />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

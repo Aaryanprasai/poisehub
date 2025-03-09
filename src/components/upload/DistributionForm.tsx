@@ -1,4 +1,3 @@
-
 import { FormField, FormItem, FormLabel, FormDescription, FormControl, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui-extensions/Button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -6,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormValues } from './types';
-import { useAdminContext } from '@/contexts/AdminContext';
+import { distributionPlatforms } from '@/lib/mock-data';
 
 interface DistributionFormProps {
   form: UseFormReturn<FormValues>;
@@ -15,7 +14,6 @@ interface DistributionFormProps {
 }
 
 export function DistributionForm({ form, onBack, onNext }: DistributionFormProps) {
-  const { distributionPlatforms } = useAdminContext();
   const selectedServices = form.watch('distributionServices');
 
   const toggleAllServices = () => {
