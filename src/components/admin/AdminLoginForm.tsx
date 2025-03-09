@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -9,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { ShieldCheck, Mail, Link } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { adminLogin as loginToAdmin, requestAdminPasswordReset } from '@/lib/supabase';
+import { requestAdminPasswordReset } from '@/lib/supabase';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -83,8 +84,9 @@ export function AdminLoginForm() {
     try {
       const response = await requestAdminPasswordReset(values.email);
       
-      if (response.success && response.resetLink) {
+      if (response && response.success && response.resetLink) {
         setResetLink(response.resetLink);
+        toast.success('Password reset link generated');
       } else {
         // For security, we still show a success message even if the email doesn't exist
         toast.success('If your email exists in our system, you will receive password reset instructions');

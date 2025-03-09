@@ -42,6 +42,11 @@ export const requestAdminPasswordReset = async (email: string) => {
       body: { email },
     });
 
+    if (!response.data) {
+      console.error('Password reset error: No data returned');
+      return { success: false, error: 'No response from server' };
+    }
+
     return response.data;
   } catch (error) {
     console.error('Admin password reset error:', error);

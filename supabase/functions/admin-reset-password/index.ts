@@ -45,9 +45,13 @@ serve(async (req) => {
       .single()
 
     if (adminError || !adminData) {
+      // Don't reveal if the user exists for security
       return new Response(
-        JSON.stringify({ success: false, error: "Admin user not found" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+        JSON.stringify({ 
+          success: true, 
+          message: "If your email exists, you will receive password reset instructions"
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
       )
     }
 
