@@ -16,7 +16,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background text-foreground transition-colors duration-300">
       {/* Mobile header */}
       <MobileHeader toggleSidebar={toggleSidebar} />
       

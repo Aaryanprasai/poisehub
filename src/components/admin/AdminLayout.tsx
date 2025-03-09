@@ -16,7 +16,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background text-foreground transition-colors duration-300">
       {/* Admin header */}
       <AdminHeader toggleSidebar={toggleSidebar} />
       

@@ -1,6 +1,8 @@
+
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui-extensions/Button";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   Home, 
@@ -57,14 +59,14 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }: AdminSidebarProps) => {
       {/* Sidebar */}
       <div 
         className={cn(
-          "fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-900 text-white transition-transform duration-300 ease-in-out",
+          "fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-900 dark:bg-slate-950 text-white transition-all duration-300 ease-in-out",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0 lg:static lg:z-0",
           "flex flex-col"
         )}
       >
         {/* Sidebar Header */}
-        <div className="h-16 border-b border-slate-800 flex items-center justify-between px-4">
+        <div className="h-16 border-b border-slate-800 dark:border-slate-900 flex items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <img 
               src="/lovable-uploads/0e7944a1-7691-4813-a45b-831d6f5e1e44.png" 
@@ -73,14 +75,17 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }: AdminSidebarProps) => {
             />
             <h1 className="text-xl font-bold tracking-tight">Admin Panel</h1>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-white hover:bg-slate-800"
-            onClick={toggleSidebar}
-          >
-            <X className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <ThemeToggle variant="ghost" className="text-white hover:bg-slate-800 dark:hover:bg-slate-900" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden text-white hover:bg-slate-800 dark:hover:bg-slate-900"
+              onClick={toggleSidebar}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
         
         {/* Sidebar Navigation */}
@@ -91,9 +96,9 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }: AdminSidebarProps) => {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start gap-2 font-normal text-white hover:bg-slate-800",
+                    "w-full justify-start gap-2 font-normal text-white hover:bg-slate-800 dark:hover:bg-slate-900",
                     location.pathname === item.href 
-                      ? "bg-slate-800 font-medium" 
+                      ? "bg-slate-800 dark:bg-slate-900 font-medium" 
                       : ""
                   )}
                 >
@@ -106,11 +111,11 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }: AdminSidebarProps) => {
         </div>
         
         {/* Go to user dashboard */}
-        <div className="border-t border-slate-800 p-4">
+        <div className="border-t border-slate-800 dark:border-slate-900 p-4">
           <Link to="/dashboard" className="w-full">
             <Button
               variant="outline"
-              className="w-full justify-start text-white border-slate-700 hover:bg-slate-800 hover:text-white"
+              className="w-full justify-start text-white border-slate-700 hover:bg-slate-800 hover:text-white dark:border-slate-800 dark:hover:bg-slate-900"
             >
               <PanelLeft className="h-4 w-4 mr-2" />
               User Dashboard
