@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export interface User {
@@ -7,7 +8,7 @@ export interface User {
   avatar: string;
   phoneNumber: string;
   twoFactorEnabled: boolean;
-  role: string;
+  role: 'artist' | 'admin' | 'superadmin';
   createdAt: string;
   idType?: 'passport' | 'drivers_license' | 'national_id' | 'personal' | 'business' | null;
   idDocument?: File | null;
@@ -24,6 +25,8 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, idType: 'personal' | 'business') => Promise<void>;
+  adminLogin: (username: string, password: string) => Promise<void>;
+  verifyAdminOTP: (otp: string) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
   toggleTwoFactor?: (enabled: boolean) => void;
@@ -35,12 +38,25 @@ interface AuthContextType {
     taxDocument: string
   ) => void;
   requestAccountDeletion: () => void;
+  isAdmin: () => boolean;
+  isSuperAdmin: () => boolean;
+  registrationConfig: {
+    publicRegistrationEnabled: boolean;
+    inviteOnlyMode: boolean;
+  };
+  updateRegistrationConfig: (config: Partial<{ publicRegistrationEnabled: boolean; inviteOnlyMode: boolean }>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [adminOTPRequired, setAdminOTPRequired] = useState<boolean>(false);
+  const [adminLoginEmail, setAdminLoginEmail] = useState<string>('');
+  const [registrationConfig, setRegistrationConfig] = useState({
+    publicRegistrationEnabled: true,
+    inviteOnlyMode: false
+  });
 
   const login = async (email: string, password: string): Promise<void> => {
     // Mock login - in a real app, this would call an API
@@ -59,7 +75,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } as User);
   };
 
+  const adminLogin = async (username: string, password: string): Promise<void> => {
+    // In a real app, we would verify credentials against the database
+    if (username === 'beatecho' && password === 'adminpass123') {
+      // After successful password check, we require OTP
+      setAdminOTPRequired(true);
+      setAdminLoginEmail(username);
+      
+      // In a real app, send OTP via email or WhatsApp here
+      console.log('Admin OTP sent to registered email/WhatsApp');
+    } else {
+      throw new Error('Invalid admin credentials');
+    }
+  };
+
+  const verifyAdminOTP = async (otp: string): Promise<void> => {
+    // In a real app, we would verify the OTP
+    // For demo, we'll accept any 6-digit OTP
+    if (otp.length === 6 && /^\d+$/.test(otp)) {
+      setAdminOTPRequired(false);
+      setUser({
+        id: 'admin1',
+        name: 'Beat Echo Admin',
+        email: adminLoginEmail + '@beatecho.com',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+        phoneNumber: '+1234567890',
+        twoFactorEnabled: true,
+        role: adminLoginEmail === 'beatecho' ? 'superadmin' : 'admin',
+        createdAt: new Date().toISOString(),
+        verificationStatus: 'verified',
+      } as User);
+    } else {
+      throw new Error('Invalid OTP');
+    }
+  };
+
   const register = async (name: string, email: string, password: string, idType: 'personal' | 'business'): Promise<void> => {
+    // Check if public registration is enabled
+    if (!registrationConfig.publicRegistrationEnabled) {
+      throw new Error('Public registration is currently disabled');
+    }
+    
+    // Check if invite-only mode is enabled
+    if (registrationConfig.inviteOnlyMode) {
+      throw new Error('Registration is currently invite-only');
+    }
+    
     // Mock registration - in a real app, this would call an API
     setUser({
       id: '1',
@@ -78,6 +139,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    setAdminOTPRequired(false);
+    setAdminLoginEmail('');
   };
 
   const updateUser = (userData: Partial<User>) => {
@@ -129,6 +192,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const isAdmin = () => {
+    return user?.role === 'admin' || user?.role === 'superadmin';
+  };
+
+  const isSuperAdmin = () => {
+    return user?.role === 'superadmin';
+  };
+  
+  const updateRegistrationConfig = (config: Partial<{ publicRegistrationEnabled: boolean; inviteOnlyMode: boolean }>) => {
+    setRegistrationConfig({
+      ...registrationConfig,
+      ...config
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -137,12 +215,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoggedIn: !!user,
         login,
         register,
+        adminLogin,
+        verifyAdminOTP,
         logout,
         updateUser,
         toggleTwoFactor,
         updatePhoneNumber,
         uploadVerificationDocuments,
-        requestAccountDeletion
+        requestAccountDeletion,
+        isAdmin,
+        isSuperAdmin,
+        registrationConfig,
+        updateRegistrationConfig
       }}
     >
       {children}

@@ -28,6 +28,7 @@ type PhoneNumberValues = z.infer<typeof phoneNumberSchema>;
 export function SecurityForm() {
   const { user, toggleTwoFactor, updatePhoneNumber } = useAuth();
   const [showQrCode, setShowQrCode] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
   
   // Mock QR code data - in a real app, this would be generated from the backend
   const qrCodeData = "https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl=otpauth://totp/MusicApp:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=MusicApp";
@@ -52,15 +53,28 @@ export function SecurityForm() {
     if (data.twoFactorAuth && !showQrCode) {
       // When enabling 2FA, first show the QR code
       setShowQrCode(true);
-    } else {
-      // When disabling 2FA or after QR code is shown
-      toggleTwoFactor(data.twoFactorAuth);
+    } else if (!data.twoFactorAuth) {
+      // When disabling 2FA
+      if (toggleTwoFactor) {
+        toggleTwoFactor(false);
+      }
       setShowQrCode(false);
+    } else if (showQrCode && verificationCode) {
+      // When verifying the QR code setup
+      // In a real app, you would validate the verification code here
+      if (verificationCode.length === 6) {
+        if (toggleTwoFactor) {
+          toggleTwoFactor(true);
+        }
+        setShowQrCode(false);
+      }
     }
   };
 
   const onPhoneNumberSubmit = (data: PhoneNumberValues) => {
-    updatePhoneNumber(data.phoneNumber);
+    if (updatePhoneNumber) {
+      updatePhoneNumber(data.phoneNumber);
+    }
   };
 
   return (
@@ -153,7 +167,12 @@ export function SecurityForm() {
                       <FormItem>
                         <FormLabel>Verification Code</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter 6-digit code" />
+                          <Input 
+                            placeholder="Enter 6-digit code" 
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value)}
+                            maxLength={6}
+                          />
                         </FormControl>
                         <FormDescription>
                           Enter the code from Google Authenticator to verify setup
