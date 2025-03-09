@@ -19,7 +19,7 @@ export const AdminProtectedRoute = ({
   useEffect(() => {
     if (!isAdmin()) {
       toast.error('You need admin access for this page');
-      navigate('/');
+      navigate('/admin/login');
       return;
     }
 

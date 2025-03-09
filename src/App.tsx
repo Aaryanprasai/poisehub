@@ -16,6 +16,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminTracks from './pages/admin/AdminTracks';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminLogin from './pages/admin/AdminLogin';
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ function App() {
             <Routes>
               {/* Public routes - redirect to dashboard if already logged in */}
               <Route path="/" element={<Dashboard />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
               
               {/* User Routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
