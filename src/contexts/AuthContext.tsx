@@ -1,10 +1,10 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { currentUser as mockUser } from '@/lib/mock-data';
 import { toast } from 'sonner';
 import { User as UserType } from '@/lib/types';
 
+// Extended User interface that includes verification properties
 interface User {
   id: string;
   name: string;
@@ -18,6 +18,8 @@ interface User {
   idDocument: string | null;
   businessDocument: string | null;
   taxDocument: string | null;
+  role: "artist" | "admin";
+  createdAt: Date;
 }
 
 interface AuthContextType {

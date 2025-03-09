@@ -11,7 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AccountTypeSelection } from './AccountTypeSelection';
 import { PersonalIdUpload } from './PersonalIdUpload';
 import { BusinessDocumentsUpload } from './BusinessDocumentsUpload';
-import { User } from '@/lib/types';
 import { toast } from 'sonner';
 
 export const verificationSchema = z.object({
@@ -53,9 +52,12 @@ export const verificationSchema = z.object({
 export type VerificationValues = z.infer<typeof verificationSchema>;
 
 interface VerificationFormProps {
-  user: User | null;
+  user: {
+    idType?: 'personal' | 'business' | null;
+    verificationStatus?: 'unverified' | 'pending' | 'verified' | 'rejected';
+  } | null;
   uploadVerificationDocuments: (
-    idType: string,
+    idType: 'personal' | 'business',
     idDocument: string, 
     businessDocument: string, 
     taxDocument: string
