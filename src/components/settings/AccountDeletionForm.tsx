@@ -1,79 +1,52 @@
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-extensions/Card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, CheckCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui-extensions/Card';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
-const deleteSchema = z.object({
-  confirmText: z.string().refine(val => val === 'DELETE', {
-    message: 'Please type DELETE to confirm'
-  })
-});
-
-type DeleteFormValues = z.infer<typeof deleteSchema>;
-
-export function AccountDeletionForm() {
+export const AccountDeletionForm = () => {
+  const [confirmInput, setConfirmInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { user, requestAccountDeletion } = useAuth();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
-  const form = useForm<DeleteFormValues>({
-    resolver: zodResolver(deleteSchema),
-    defaultValues: {
-      confirmText: '',
-    },
-  });
+  // Check if the user already has a deletion request pending
+  const hasPendingDeletion = user?.deleteStatus === 'pending';
 
-  const onSubmit = (data: DeleteFormValues) => {
-    setIsProcessing(true);
-    
+  const handleDeleteAccount = async () => {
+    if (confirmInput !== 'DELETE') {
+      toast({
+        title: 'Error',
+        description: 'Please type DELETE to confirm account deletion',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      requestAccountDeletion();
-      
-      if (user?.hasReleases) {
-        toast.success('Account deletion request submitted successfully. An admin will review your request.');
-      } else {
-        toast.success('Account deleted successfully.');
-      }
-      
-      form.reset();
+      await requestAccountDeletion();
+      toast({
+        title: 'Account deletion requested',
+        description: user?.hasReleases 
+          ? 'Your request has been submitted and is pending review.' 
+          : 'Your account will be deleted shortly.'
+      });
     } catch (error) {
-      toast.error('Failed to process your request. Please try again.');
-      console.error('Delete account error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to request account deletion. Please try again.',
+        variant: 'destructive'
+      });
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
+      setConfirmInput('');
     }
   };
-
-  if (user?.deleteStatus === 'pending') {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Deletion</CardTitle>
-          <CardDescription>
-            Your account deletion request is being processed
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Alert className="bg-yellow-50 border-yellow-200">
-            <CheckCircle className="h-5 w-5 text-yellow-600" />
-            <AlertTitle className="text-yellow-800">Deletion Request Pending</AlertTitle>
-            <AlertDescription className="text-yellow-700">
-              Your account deletion request has been submitted and is pending review by an administrator.
-              This is because your account has active releases. Once all releases are processed, your account will be deleted.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
@@ -83,43 +56,50 @@ export function AccountDeletionForm() {
           Permanently delete your account and all associated data
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <Alert variant="destructive">
-          <AlertTriangle className="h-5 w-5" />
-          <AlertTitle>Warning: This action cannot be undone</AlertTitle>
-          <AlertDescription>
-            {user?.hasReleases
-              ? "Since your account has active releases, your deletion request will be pending until an administrator reviews it."
-              : "Your account will be immediately deleted. All your data will be permanently removed."}
-          </AlertDescription>
-        </Alert>
+      <CardContent className="space-y-4">
+        {hasPendingDeletion ? (
+          <Alert className="bg-yellow-50 border-yellow-300">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800">Deletion Request Pending</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              Your account deletion request is being processed. This may take some time if you have active releases.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <>
+            <Alert className="bg-red-50 border-red-300">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-800">Warning: This action cannot be undone</AlertTitle>
+              <AlertDescription className="text-red-700">
+                {user?.hasReleases 
+                  ? "Since you have active releases, your deletion request will need to be reviewed. Your account will remain accessible until the request is approved."
+                  : "Your account will be permanently deleted along with all your data, including tracks, royalty information, and personal details."}
+              </AlertDescription>
+            </Alert>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="confirmText"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm deletion by typing DELETE</FormLabel>
-                  <FormControl>
-                    <Input placeholder="DELETE" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <Button 
-              type="submit" 
-              variant="destructive"
-              isLoading={isProcessing}
-            >
-              Delete Account
-            </Button>
-          </form>
-        </Form>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Type DELETE to confirm:</p>
+              <Input
+                value={confirmInput}
+                onChange={(e) => setConfirmInput(e.target.value)}
+                placeholder="DELETE"
+                className="max-w-md"
+              />
+            </div>
+          </>
+        )}
       </CardContent>
+      <CardFooter>
+        {!hasPendingDeletion && (
+          <Button
+            variant="destructive"
+            disabled={confirmInput !== 'DELETE' || isLoading}
+            onClick={handleDeleteAccount}
+          >
+            {isLoading ? "Processing..." : "Delete My Account"}
+          </Button>
+        )}
+      </CardFooter>
     </Card>
   );
-}
+};

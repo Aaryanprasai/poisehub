@@ -90,17 +90,13 @@ export function DistributionForm({ form, onBack, onNext }: DistributionFormProps
                               }}
                               className="sr-only"
                             />
-                            <div className="h-12 flex items-center justify-center">
+                            <div className="h-16 flex items-center justify-center">
                               <img
                                 src={service.logo}
                                 alt={service.name}
                                 className="h-full max-w-[100px] object-contain"
+                                title={service.name}
                               />
-                            </div>
-                            <div className="text-center">
-                              <FormLabel className="text-sm font-normal">
-                                {service.name}
-                              </FormLabel>
                             </div>
                           </div>
                         </FormControl>

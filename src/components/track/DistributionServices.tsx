@@ -16,7 +16,7 @@ export function DistributionServices({ services, isTakenDown }: DistributionServ
       {services.slice(0, 3).map((service) => (
         <div 
           key={service.id}
-          className="h-5 w-5 relative group"
+          className="h-7 w-7 relative group"
           title={service.name}
         >
           <img 
@@ -27,7 +27,7 @@ export function DistributionServices({ services, isTakenDown }: DistributionServ
         </div>
       ))}
       {services.length > 3 && (
-        <div className="h-5 w-5 bg-secondary rounded-full flex items-center justify-center text-xs font-medium">
+        <div className="h-7 w-7 bg-secondary rounded-full flex items-center justify-center text-xs font-medium">
           +{services.length - 3}
         </div>
       )}
