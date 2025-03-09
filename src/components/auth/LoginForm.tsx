@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { Separator } from '@/components/ui/separator';
-import { Google } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 const loginSchema = z.object({
   emailOrUsername: z.string().min(1, 'Email or username is required'),
@@ -60,9 +60,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const handleGoogleLogin = () => {
     setIsGoogleLoggingIn(true);
     
-    // Simulate Google login delay
+    // This function will be connected to real Google OAuth later
+    // For now, we're simulating the authentication flow
     setTimeout(() => {
-      console.log('Google Login');
+      console.log('Google Login - Ready for API integration');
       setIsGoogleLoggingIn(false);
       toast.success('Google login successful!');
       navigate('/dashboard');
@@ -133,7 +134,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         className="w-full border-gray-300 hover:bg-gray-50"
         onClick={handleGoogleLogin}
         isLoading={isGoogleLoggingIn}
-        leftIcon={<Google className="h-4 w-4" />}
+        leftIcon={<Mail className="h-4 w-4" />}
       >
         Continue with Google
       </Button>
