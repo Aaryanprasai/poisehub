@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,7 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Mail } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -127,9 +126,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 flex flex-col items-center">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
           <FormField
             control={form.control}
             name="emailOrUsername"
@@ -165,7 +164,18 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               </FormItem>
             )}
           />
-          <div className="text-right">
+          
+          {/* Sign In Button moved above forgot password */}
+          <Button 
+            type="submit" 
+            className="w-full" 
+            isLoading={isLoggingIn}
+          >
+            Sign In
+          </Button>
+          
+          {/* Forgot Password Link moved below sign in button */}
+          <div className="text-center">
             <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
               <DialogTrigger asChild>
                 <Button variant="link" className="text-sm p-0 h-auto">
@@ -224,6 +234,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                           type="submit" 
                           className="w-full" 
                           isLoading={isResetting}
+                          leftIcon={<Mail className="h-4 w-4" />}
                         >
                           Send Reset Instructions
                         </Button>
@@ -234,13 +245,6 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               </DialogContent>
             </Dialog>
           </div>
-          <Button 
-            type="submit" 
-            className="w-full" 
-            isLoading={isLoggingIn}
-          >
-            Sign In
-          </Button>
         </form>
       </Form>
     </div>
