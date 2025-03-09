@@ -2,18 +2,29 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/supabase';
 
-// Note: These are placeholder values for development
-// In a real application, use the Supabase integration with Lovable
-const supabaseUrl = process.env.VITE_SUPABASE_URL || "https://example.supabase.co";
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "example-anon-key";
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-// This is a mock client that doesn't actually connect to Supabase
-// When you're ready to use real data, use the Supabase integration in Lovable
+// Create a Supabase client with the public key for regular operations
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-// Also create a mock admin client
+// For admin operations, we'll use the edge function to authenticate
 export const supabaseAdmin = supabase;
 
-// For actual implementation, you would use:
-// import { currentUser } from '@/lib/mock-data';
-// And then use the mock data throughout your application
+// Call the admin authentication edge function
+export const adminLogin = async (username: string, password: string) => {
+  try {
+    const response = await supabase.functions.invoke('admin-auth', {
+      body: { username, password },
+    });
+
+    if (!response.data?.success) {
+      throw new Error(response.data?.error || 'Authentication failed');
+    }
+
+    return response.data.user;
+  } catch (error) {
+    console.error('Admin login error:', error);
+    throw error;
+  }
+};

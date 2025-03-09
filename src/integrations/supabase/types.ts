@@ -9,13 +9,49 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admin_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_superadmin: boolean | null
+          last_login: string | null
+          password_hash: string
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_superadmin?: boolean | null
+          last_login?: string | null
+          password_hash: string
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_superadmin?: boolean | null
+          last_login?: string | null
+          password_hash?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      verify_admin_login: {
+        Args: {
+          username_input: string
+          password_input: string
+        }
+        Returns: {
+          id: string
+          username: string
+          is_superadmin: boolean
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

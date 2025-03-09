@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { adminLogin as loginToAdmin } from '@/lib/supabase';
 
 const adminLoginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -33,10 +34,15 @@ export function AdminLoginForm() {
     setIsLoggingIn(true);
     
     try {
+      const adminUser = await loginToAdmin(values.username, values.password);
+      
+      // Use the adminLogin function from AuthContext to set the user in the app state
       await adminLogin(values.username, values.password);
+      
       toast.success('Login successful!');
       navigate('/admin/dashboard');
     } catch (error) {
+      console.error('Login error:', error);
       toast.error('Login failed. Please check your credentials.');
     } finally {
       setIsLoggingIn(false);
