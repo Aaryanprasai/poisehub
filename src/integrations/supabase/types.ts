@@ -36,6 +36,228 @@ export type Database = {
         }
         Relationships: []
       }
+      distribution_services: {
+        Row: {
+          id: string
+          logo: string
+          name: string
+        }
+        Insert: {
+          id?: string
+          logo: string
+          name: string
+        }
+        Update: {
+          id?: string
+          logo?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      royalty_payments: {
+        Row: {
+          amount: number
+          artist_id: string
+          created_at: string | null
+          id: string
+          isrc: string | null
+          payment_date: string
+          period: string
+          service_name: string
+          status: string
+          track_id: string | null
+        }
+        Insert: {
+          amount: number
+          artist_id: string
+          created_at?: string | null
+          id?: string
+          isrc?: string | null
+          payment_date: string
+          period: string
+          service_name: string
+          status?: string
+          track_id?: string | null
+        }
+        Update: {
+          amount?: number
+          artist_id?: string
+          created_at?: string | null
+          id?: string
+          isrc?: string | null
+          payment_date?: string
+          period?: string
+          service_name?: string
+          status?: string
+          track_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "royalty_payments_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      track_distribution_services: {
+        Row: {
+          service_id: string
+          track_id: string
+        }
+        Insert: {
+          service_id: string
+          track_id: string
+        }
+        Update: {
+          service_id?: string
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_distribution_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "distribution_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "track_distribution_services_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      track_metadata: {
+        Row: {
+          created_at: string | null
+          genre: string | null
+          id: string
+          isrc: string
+          release_date: string | null
+          track_id: string | null
+          upc: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          genre?: string | null
+          id?: string
+          isrc: string
+          release_date?: string | null
+          track_id?: string | null
+          upc?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          genre?: string | null
+          id?: string
+          isrc?: string
+          release_date?: string | null
+          track_id?: string | null
+          upc?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_metadata_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      track_streams: {
+        Row: {
+          created_at: string | null
+          id: string
+          isrc: string | null
+          service_name: string
+          stream_count: number
+          stream_date: string
+          track_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          isrc?: string | null
+          service_name: string
+          stream_count: number
+          stream_date: string
+          track_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          isrc?: string | null
+          service_name?: string
+          stream_count?: number
+          stream_date?: string
+          track_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_streams_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracks: {
+        Row: {
+          artist: string
+          artwork: string
+          duration: number
+          genre: string
+          id: string
+          modification_message: string | null
+          modification_requested: boolean | null
+          release_date: string | null
+          status: string
+          submitted_at: string | null
+          taken_down_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          artist: string
+          artwork: string
+          duration: number
+          genre: string
+          id?: string
+          modification_message?: string | null
+          modification_requested?: boolean | null
+          release_date?: string | null
+          status?: string
+          submitted_at?: string | null
+          taken_down_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          artist?: string
+          artwork?: string
+          duration?: number
+          genre?: string
+          id?: string
+          modification_message?: string | null
+          modification_requested?: boolean | null
+          release_date?: string | null
+          status?: string
+          submitted_at?: string | null
+          taken_down_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

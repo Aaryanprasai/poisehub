@@ -25,15 +25,15 @@ export function BulkDataUpload() {
 
     if (type === 'streams') {
       // Define streams template CSV headers and sample data
-      csvContent = 'track_id,service_name,stream_count,stream_date\n';
-      csvContent += 'track_123,Spotify,1000,2023-10-01\n';
-      csvContent += 'track_456,Apple Music,750,2023-10-01\n';
+      csvContent = 'track_id,service_name,stream_count,stream_date,isrc\n';
+      csvContent += 'track_123,Spotify,1000,2023-10-01,US-ABC-23-12345\n';
+      csvContent += 'track_456,Apple Music,750,2023-10-01,US-ABC-23-12346\n';
       fileName = 'streams_template.csv';
     } else {
       // Define royalties template CSV headers and sample data
-      csvContent = 'artist_id,track_id,service_name,amount,period,payment_date,status\n';
-      csvContent += 'artist_123,track_123,Spotify,235.50,October 2023,2023-10-15,pending\n';
-      csvContent += 'artist_456,track_456,Apple Music,189.75,October 2023,2023-10-20,paid\n';
+      csvContent = 'artist_id,track_id,service_name,amount,period,payment_date,status,isrc\n';
+      csvContent += 'artist_123,track_123,Spotify,235.50,October 2023,2023-10-15,pending,US-ABC-23-12345\n';
+      csvContent += 'artist_456,track_456,Apple Music,189.75,October 2023,2023-10-20,paid,US-ABC-23-12346\n';
       fileName = 'royalties_template.csv';
     }
 
@@ -66,6 +66,13 @@ export function BulkDataUpload() {
     });
   };
 
+  // Function to validate ISRC format
+  const validateISRC = (isrc: string): boolean => {
+    // ISRC format: CC-XXX-YY-NNNNN (country code, registrant code, year, designation code)
+    const isrcRegex = /^[A-Z]{2}-[A-Z0-9]{3}-\d{2}-\d{5}$/;
+    return isrcRegex.test(isrc);
+  };
+
   // Handle file upload
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'streams' | 'royalties') => {
     const file = event.target.files?.[0];
@@ -86,6 +93,15 @@ export function BulkDataUpload() {
           throw new Error('No data found in the file or invalid format');
         }
 
+        // Validate ISRC codes in the data
+        const invalidISRCs = parsedData
+          .filter(row => row.isrc && !validateISRC(row.isrc))
+          .map(row => row.isrc);
+        
+        if (invalidISRCs.length > 0) {
+          throw new Error(`Invalid ISRC formats found: ${invalidISRCs.join(', ')}`);
+        }
+
         if (type === 'streams') {
           // Insert into streams table
           const { error } = await supabase.from('track_streams').insert(
@@ -93,7 +109,8 @@ export function BulkDataUpload() {
               track_id: row.track_id,
               service_name: row.service_name,
               stream_count: parseInt(row.stream_count, 10),
-              stream_date: row.stream_date
+              stream_date: row.stream_date,
+              isrc: row.isrc
             }))
           );
           
@@ -108,7 +125,8 @@ export function BulkDataUpload() {
               amount: parseFloat(row.amount),
               period: row.period,
               payment_date: row.payment_date,
-              status: row.status
+              status: row.status,
+              isrc: row.isrc
             }))
           );
           
@@ -202,7 +220,7 @@ export function BulkDataUpload() {
                   Download Template
                 </Button>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Download the CSV template for stream data uploads. Fill in your data following the format in the template.
+                  Download the CSV template for stream data uploads. Include ISRC codes in the format (CC-XXX-YY-NNNNN).
                 </p>
               </div>
               
@@ -245,7 +263,7 @@ export function BulkDataUpload() {
                   Download Template
                 </Button>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Download the CSV template for royalty data uploads. Fill in your data following the format in the template.
+                  Download the CSV template for royalty data uploads. Include ISRC codes in the format (CC-XXX-YY-NNNNN).
                 </p>
               </div>
               

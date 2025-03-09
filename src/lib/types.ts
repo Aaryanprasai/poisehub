@@ -4,7 +4,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
-  role: "artist" | "admin";
+  role: "artist" | "admin" | "superadmin";
   createdAt: Date;
 }
 
@@ -23,6 +23,8 @@ export interface Track {
   takenDownAt?: Date;
   modificationRequested?: boolean;
   modificationMessage?: string;
+  isrc?: string;
+  upc?: string;
 }
 
 export interface DistributionService {
@@ -33,9 +35,26 @@ export interface DistributionService {
 }
 
 export interface RoyaltyData {
+  id?: string;
   month: string;
   amount: number;
   service: string;
+  isrc?: string;
+  trackId?: string;
+  trackTitle?: string;
+}
+
+export interface StreamData {
+  id: string;
+  trackId: string;
+  serviceName: string;
+  streamCount: number;
+  streamDate: string;
+  isrc?: string;
+  track?: {
+    title: string;
+    artist: string;
+  };
 }
 
 export interface Ticket {
@@ -55,5 +74,16 @@ export interface TicketResponse {
   createdAt: Date;
   userId: string;
   userName: string;
-  userRole: "artist" | "admin";
+  userRole: "artist" | "admin" | "superadmin";
+}
+
+export interface TrackMetadata {
+  id: string;
+  trackId: string;
+  userId: string;
+  isrc: string;
+  upc?: string;
+  releaseDate?: Date;
+  genre?: string;
+  createdAt: Date;
 }

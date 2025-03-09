@@ -11,6 +11,7 @@ interface RoyaltyChartProps {
   className?: string;
   height?: number;
   showLegend?: boolean;
+  isrcFilter?: string | null; // Add ISRC filter option
 }
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
@@ -46,11 +47,17 @@ export function RoyaltyChart({
   title = "Royalties", 
   className,
   height = 300,
-  showLegend = true
+  showLegend = true,
+  isrcFilter = null
 }: RoyaltyChartProps) {
   const chartData = useMemo(() => {
+    // Filter by ISRC if provided
+    const filteredData = isrcFilter 
+      ? data.filter(item => item.isrc === isrcFilter)
+      : data;
+      
     // Group by month and service
-    const groupedData = data.reduce((acc, item) => {
+    const groupedData = filteredData.reduce((acc, item) => {
       if (!acc[item.month]) {
         acc[item.month] = {};
       }
@@ -72,7 +79,7 @@ export function RoyaltyChart({
         total: Object.values(services).reduce((sum, amount) => sum + amount, 0),
       };
     });
-  }, [data]);
+  }, [data, isrcFilter]);
 
   // Get unique services for creating bars
   const services = useMemo(() => {
@@ -89,43 +96,49 @@ export function RoyaltyChart({
       </CardHeader>
       <CardContent className="p-1">
         <div className={`h-[${height}px] w-full`} style={{ height: `${height}px` }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              margin={{
-                top: 20,
-                right: 20,
-                left: 20,
-                bottom: 20,
-              }}
-            >
-              <XAxis 
-                dataKey="month" 
-                tick={{ fontSize: 12 }}
-                tickLine={false}
-                axisLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
-              />
-              <YAxis 
-                tickFormatter={(value) => `$${value}`}
-                tick={{ fontSize: 12 }}
-                tickLine={false}
-                axisLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              {showLegend && <Legend />}
-              {services.map((service, index) => (
-                <Bar
-                  key={service}
-                  dataKey={service}
-                  name={service}
-                  fill={colors[index % colors.length]}
-                  radius={[4, 4, 0, 0]}
-                  barSize={24}
-                  animationDuration={1000}
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{
+                  top: 20,
+                  right: 20,
+                  left: 20,
+                  bottom: 20,
+                }}
+              >
+                <XAxis 
+                  dataKey="month" 
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
                 />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
+                <YAxis 
+                  tickFormatter={(value) => `$${value}`}
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                {showLegend && <Legend />}
+                {services.map((service, index) => (
+                  <Bar
+                    key={service}
+                    dataKey={service}
+                    name={service}
+                    fill={colors[index % colors.length]}
+                    radius={[4, 4, 0, 0]}
+                    barSize={24}
+                    animationDuration={1000}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-muted-foreground">
+              No royalty data available
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
