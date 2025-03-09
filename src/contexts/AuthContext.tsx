@@ -11,6 +11,7 @@ export type { User } from '@/lib/types';
 // Define the core authentication context
 interface AuthContextType {
   user: User | null;
+  currentUser: User | null; // Added currentUser to match what App.tsx expects
   isAuthenticated: boolean;
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -57,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        currentUser: user, // Set currentUser to the same user object
         isAuthenticated: !!user,
         isLoggedIn: !!user,
         login,
