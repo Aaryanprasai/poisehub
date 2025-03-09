@@ -1,6 +1,6 @@
 
 import { useState, ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Music, 
   Home, 
@@ -11,10 +11,17 @@ import {
   Settings, 
   User,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui-extensions/Button';
+import { 
+  Avatar,
+  AvatarImage,
+  AvatarFallback 
+} from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -44,10 +51,39 @@ const SidebarItem = ({ icon: Icon, label, href, isActive }: SidebarItemProps) =>
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleLogout = () => {
+    // In a real app, you would call your auth logout function here
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+    navigate('/');
+  };
+
+  const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setProfileImage(e.target.result as string);
+          toast({
+            title: "Profile updated",
+            description: "Your profile picture has been updated.",
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const navigationItems = [
@@ -126,15 +162,36 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         
         <div className="border-t p-4">
           <div className="flex items-center gap-3">
-            <div className="relative w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <User className="h-4 w-4" />
-            </div>
+            <label className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary cursor-pointer overflow-hidden hover:opacity-90 transition-opacity">
+              {profileImage ? (
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={profileImage} alt="Profile picture" />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+              ) : (
+                <>
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Upload profile picture</span>
+                </>
+              )}
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="absolute inset-0 opacity-0 cursor-pointer" 
+                onChange={handleProfileImageChange}
+              />
+            </label>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">John Doe</p>
               <p className="text-xs text-muted-foreground truncate">artist@example.com</p>
             </div>
-            <Button variant="ghost" size="icon">
-              <Settings className="h-4 w-4" />
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={handleLogout}
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
