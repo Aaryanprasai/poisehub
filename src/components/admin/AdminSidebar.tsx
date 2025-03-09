@@ -14,7 +14,8 @@ import {
   UserPlus,
   X,
   PanelLeft,
-  UserCog
+  UserCog,
+  Cloud
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -34,6 +35,7 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }: AdminSidebarProps) => {
     { icon: DollarSign, label: "Royalties", href: "/admin/royalties" },
     { icon: ShieldAlert, label: "Deletion Requests", href: "/admin/deletion-requests" },
     { icon: Settings, label: "Settings", href: "/admin/settings" },
+    { icon: Cloud, label: "API Configuration", href: "/admin/api-config" },
   ];
 
   // Super admin exclusive items

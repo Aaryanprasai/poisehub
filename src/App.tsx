@@ -28,6 +28,7 @@ import AdminDeletionRequests from "./pages/admin/AdminDeletionRequests";
 import AdminCreate from "./pages/admin/AdminCreate";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminManagement from "./pages/admin/AdminManagement";
+import AdminApiConfig from "./pages/admin/AdminApiConfig";
 
 const queryClient = new QueryClient();
 
@@ -128,6 +129,11 @@ const App = () => (
             <Route path="/admin/admin-management" element={
               <ProtectedRoute>
                 <AdminManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/api-config" element={
+              <ProtectedRoute>
+                <AdminApiConfig />
               </ProtectedRoute>
             } />
             
