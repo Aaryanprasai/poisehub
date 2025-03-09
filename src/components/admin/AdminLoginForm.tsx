@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { ShieldCheck, Key } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const adminLoginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -134,11 +135,16 @@ export function AdminLoginForm() {
                 <FormItem>
                   <FormLabel>Verification Code (OTP)</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter 6-digit code"
-                      maxLength={6}
-                      {...field}
-                    />
+                    <InputOTP maxLength={6} {...field}>
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
