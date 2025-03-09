@@ -71,11 +71,6 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }: AdminSidebarProps) => {
         {/* Sidebar Header */}
         <div className="h-16 border-b border-slate-800 flex items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/0e7944a1-7691-4813-a45b-831d6f5e1e44.png" 
-              alt="Logo" 
-              className="h-8 w-auto"
-            />
             <h1 className="text-xl font-bold tracking-tight">Admin Panel</h1>
           </div>
           <Button

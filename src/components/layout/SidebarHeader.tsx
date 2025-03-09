@@ -10,11 +10,6 @@ const SidebarHeader = ({ toggleSidebar }: SidebarHeaderProps) => {
   return (
     <div className="h-16 flex items-center px-4 border-b">
       <div className="flex items-center gap-2">
-        <img 
-          src="/lovable-uploads/0e7944a1-7691-4813-a45b-831d6f5e1e44.png" 
-          alt="Poise Logo" 
-          className="h-6 w-auto"
-        />
         <h1 className="text-xl font-bold">Poise</h1>
       </div>
       <Button 

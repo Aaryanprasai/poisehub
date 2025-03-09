@@ -8,11 +8,6 @@ export default function AdminLogin() {
       <div className="animate-fade-in w-full max-w-md">
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/0e7944a1-7691-4813-a45b-831d6f5e1e44.png" 
-              alt="Poise Logo" 
-              className="h-10 w-auto"
-            />
             <h1 className="text-3xl font-bold tracking-tight text-white">Poise</h1>
           </div>
         </div>
