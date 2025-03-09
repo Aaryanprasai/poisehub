@@ -2,7 +2,6 @@
 import { Menu, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { ThemeToggle } from "@/components/common/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,13 +25,13 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
   };
 
   return (
-    <header className="h-16 border-b bg-slate-900 dark:bg-slate-950 text-white fixed top-0 left-0 right-0 z-30 flex items-center lg:hidden px-4 transition-colors duration-300">
+    <header className="h-16 border-b bg-slate-900 text-white fixed top-0 left-0 right-0 z-30 flex items-center lg:hidden px-4">
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-4">
           <Button 
             variant="ghost" 
             size="icon"
-            className="text-white hover:bg-slate-800 dark:hover:bg-slate-900"
+            className="text-white hover:bg-slate-800"
             onClick={toggleSidebar}
           >
             <Menu className="h-5 w-5" />
@@ -48,12 +47,10 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
         </div>
         
         <div className="flex items-center gap-2">
-          <ThemeToggle variant="ghost" className="text-white hover:bg-slate-800 dark:hover:bg-slate-900" />
-          
           <Button
             variant="ghost"
             size="icon"
-            className="text-white hover:bg-slate-800 dark:hover:bg-slate-900 relative"
+            className="text-white hover:bg-slate-800 relative"
           >
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 bg-red-500 rounded-full w-2 h-2"></span>
@@ -64,7 +61,7 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-white hover:bg-slate-800 dark:hover:bg-slate-900"
+                className="text-white hover:bg-slate-800"
               >
                 <User className="h-5 w-5" />
               </Button>
