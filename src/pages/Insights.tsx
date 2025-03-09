@@ -11,10 +11,17 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Define the expected data structure
+interface InsightsData {
+  streams: any[];
+  royalties: any[];
+  tracks: any[];
+}
+
 const Insights = () => {
   const [timeRange, setTimeRange] = useState('month');
   const [isLoading, setIsLoading] = useState(false);
-  const [insightsData, setInsightsData] = useState<any>(null);
+  const [insightsData, setInsightsData] = useState<InsightsData | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -64,7 +71,11 @@ const Insights = () => {
         if (tracksError) throw tracksError;
         
         if (!userTracks || userTracks.length === 0) {
-          setInsightsData([]);
+          setInsightsData({
+            streams: [],
+            royalties: [],
+            tracks: []
+          });
           return;
         }
         

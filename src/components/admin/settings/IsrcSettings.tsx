@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui-extensions/Button";
 import { AlertCircle, Save } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui-extensions/Card";
+import { formatIsrcWithHyphens } from "@/utils/isrcUtils";
 
 // Mock data - in a real app, this would come from an API
 const mockIsrcSettings = {
@@ -30,7 +31,7 @@ type IsrcFormValues = z.infer<typeof isrcSchema>;
 
 export function IsrcSettings() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentPrefix, setCurrentPrefix] = useState(`${mockIsrcSettings.countryCode}-${mockIsrcSettings.registrantCode}-${mockIsrcSettings.year}`);
+  const [currentPrefix, setCurrentPrefix] = useState(`${mockIsrcSettings.countryCode}${mockIsrcSettings.registrantCode}${mockIsrcSettings.year}`);
   const [lastAssigned, setLastAssigned] = useState(mockIsrcSettings.lastSequence);
 
   const form = useForm<IsrcFormValues>({
@@ -50,15 +51,17 @@ export function IsrcSettings() {
     console.log("Updating ISRC settings:", values);
     
     setTimeout(() => {
-      setCurrentPrefix(`${values.countryCode}-${values.registrantCode}-${values.year}`);
+      setCurrentPrefix(`${values.countryCode}${values.registrantCode}${values.year}`);
       setLastAssigned(values.lastSequence);
       setIsSubmitting(false);
       toast.success("ISRC settings updated successfully");
     }, 1000);
   };
 
-  // Generate an example ISRC code based on the current settings
-  const exampleIsrc = `${form.watch("countryCode")}-${form.watch("registrantCode")}-${form.watch("year")}-${(form.watch("lastSequence") + 1).toString().padStart(5, "0")}`;
+  // Generate an example ISRC code based on the current settings without hyphens
+  const exampleIsrc = `${form.watch("countryCode")}${form.watch("registrantCode")}${form.watch("year")}${(form.watch("lastSequence") + 1).toString().padStart(5, "0")}`;
+  // Also generate a display version with hyphens for reference
+  const exampleIsrcFormatted = formatIsrcWithHyphens(exampleIsrc);
 
   return (
     <div className="space-y-6">
@@ -79,7 +82,7 @@ export function IsrcSettings() {
               Last assigned sequence: <span className="font-mono">{lastAssigned.toString().padStart(5, "0")}</span>
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              Next ISRC to be assigned: <span className="font-mono">{currentPrefix}-{(lastAssigned + 1).toString().padStart(5, "0")}</span>
+              Next ISRC to be assigned: <span className="font-mono">{currentPrefix}{(lastAssigned + 1).toString().padStart(5, "0")}</span>
             </p>
           </div>
 
@@ -159,7 +162,10 @@ export function IsrcSettings() {
                 <AlertCircle className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-blue-700">
-                    Preview: The next ISRC to be assigned will be <span className="font-mono font-bold">{exampleIsrc}</span>
+                    Next ISRC: <span className="font-mono font-bold">{exampleIsrc}</span>
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    (Format reference: {exampleIsrcFormatted})
                   </p>
                 </div>
               </div>

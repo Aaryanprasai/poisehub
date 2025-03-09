@@ -3,12 +3,39 @@
 // For this demo, we're using mock data
 
 /**
- * Validate if an ISRC code matches the expected format: CC-XXX-YY-NNNNN
+ * Validate if an ISRC code matches the expected format
+ * Format with hyphens (for input): CC-XXX-YY-NNNNN
+ * Format without hyphens (for storage): CCXXXYYNNNNN
  */
 export function validateIsrc(isrc: string): boolean {
-  // ISRC format: CC-XXX-YY-NNNNN
-  const isrcRegex = /^[A-Z]{2}-[A-Z0-9]{3}-\d{2}-\d{5}$/;
-  return isrcRegex.test(isrc);
+  // First normalize by removing hyphens
+  const normalizedIsrc = isrc.replace(/-/g, '');
+  
+  // Check if it matches the expected pattern when normalized
+  const isrcRegex = /^[A-Z]{2}[A-Z0-9]{3}\d{2}\d{5}$/;
+  return isrcRegex.test(normalizedIsrc);
+}
+
+/**
+ * Format an ISRC code with hyphens for display purposes 
+ */
+export function formatIsrcWithHyphens(isrc: string): string {
+  // Remove any existing hyphens first
+  const normalizedIsrc = isrc.replace(/-/g, '');
+  
+  if (normalizedIsrc.length !== 12) {
+    return isrc; // Return original if not the right length
+  }
+  
+  // Format as CC-XXX-YY-NNNNN
+  return `${normalizedIsrc.substring(0, 2)}-${normalizedIsrc.substring(2, 5)}-${normalizedIsrc.substring(5, 7)}-${normalizedIsrc.substring(7)}`;
+}
+
+/**
+ * Normalize ISRC by removing hyphens for storage
+ */
+export function normalizeIsrc(isrc: string): string {
+  return isrc.replace(/-/g, '');
 }
 
 /**
@@ -21,8 +48,8 @@ export function generateIsrc(
   // Increment the sequence and pad with leading zeros to ensure 5 digits
   const nextSequence = (lastSequence + 1).toString().padStart(5, '0');
   
-  // Format: CC-XXX-YY-NNNNN
-  return `${prefix.countryCode.toUpperCase()}-${prefix.registrantCode.toUpperCase()}-${prefix.year}-${nextSequence}`;
+  // Format without hyphens: CCXXXYYNNNNN
+  return `${prefix.countryCode.toUpperCase()}${prefix.registrantCode.toUpperCase()}${prefix.year}${nextSequence}`;
 }
 
 /**

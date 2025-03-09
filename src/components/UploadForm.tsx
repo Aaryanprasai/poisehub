@@ -20,7 +20,7 @@ import { FileUploadForm } from './upload/FileUploadForm';
 import { DistributionForm } from './upload/DistributionForm';
 import { RightsForm } from './upload/RightsForm';
 import { formSchema, FormValues } from './upload/types';
-import { getNextIsrc, incrementIsrcSequence, validateIsrc } from '@/utils/isrcUtils';
+import { getNextIsrc, incrementIsrcSequence, validateIsrc, normalizeIsrc } from '@/utils/isrcUtils';
 
 interface UploadFormProps {
   open: boolean;
@@ -104,10 +104,14 @@ export function UploadForm({ open, onOpenChange }: UploadFormProps) {
       return;
     }
 
-    // Validate ISRC if provided
-    if (values.isrcCode && !validateIsrc(values.isrcCode)) {
-      toast.error('Invalid ISRC format. Should be CC-XXX-YY-NNNNN');
-      return;
+    // Validate ISRC if provided and normalize it (remove hyphens)
+    let normalizedIsrc = '';
+    if (values.isrcCode) {
+      if (!validateIsrc(values.isrcCode)) {
+        toast.error('Invalid ISRC format. Please correct it before submitting.');
+        return;
+      }
+      normalizedIsrc = normalizeIsrc(values.isrcCode);
     }
 
     setIsSubmitting(true);
@@ -115,12 +119,15 @@ export function UploadForm({ open, onOpenChange }: UploadFormProps) {
     // Auto-assign ISRC if not provided
     let finalValues = { ...values };
     if (!values.isrcCode || values.isrcCode.trim() === '') {
-      const nextIsrc = getNextIsrc();
+      const nextIsrc = getNextIsrc(); // This now returns ISRC without hyphens
       finalValues.isrcCode = nextIsrc;
       setAssignedIsrc(nextIsrc);
       
       // In a real app, this would be done on the server
       incrementIsrcSequence();
+    } else {
+      // Ensure the provided ISRC is normalized
+      finalValues.isrcCode = normalizedIsrc;
     }
 
     // Simulate upload delay

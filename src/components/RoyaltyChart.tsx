@@ -51,9 +51,13 @@ export function RoyaltyChart({
   isrcFilter = null
 }: RoyaltyChartProps) {
   const chartData = useMemo(() => {
-    // Filter by ISRC if provided
+    // Filter by ISRC if provided (use normalized ISRC without hyphens)
     const filteredData = isrcFilter 
-      ? data.filter(item => item.isrc === isrcFilter)
+      ? data.filter(item => {
+          const normalizedItemIsrc = item.isrc?.replace(/-/g, '');
+          const normalizedFilter = isrcFilter.replace(/-/g, '');
+          return normalizedItemIsrc === normalizedFilter;
+        })
       : data;
       
     // Group by month and service

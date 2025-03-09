@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Upload, AlertCircle } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormValues } from './types';
-import { validateIsrc } from '@/utils/isrcUtils';
+import { validateIsrc, formatIsrcWithHyphens } from '@/utils/isrcUtils';
 import { useState, useEffect } from 'react';
 
 interface RightsFormProps {
@@ -20,19 +20,34 @@ export function RightsForm({ form, isSubmitting, onBack }: RightsFormProps) {
   const hasPublishingRights = form.watch('hasPublishingRights');
   const isrcCode = form.watch('isrcCode');
   const [isrcError, setIsrcError] = useState<string | null>(null);
+  const [isrcDisplay, setIsrcDisplay] = useState<string | null>(null);
 
-  // Validate ISRC if provided
+  // Validate ISRC if provided and show formatted display version
   useEffect(() => {
     if (isrcCode && isrcCode.trim() !== '') {
       if (!validateIsrc(isrcCode)) {
-        setIsrcError('Invalid ISRC format. Should be CC-XXX-YY-NNNNN (e.g., US-ABC-23-00001)');
+        setIsrcError('Invalid ISRC format. Example format: USABC2300001 or US-ABC-23-00001');
+        setIsrcDisplay(null);
       } else {
         setIsrcError(null);
+        // For display purposes only, show the formatted version with hyphens
+        setIsrcDisplay(formatIsrcWithHyphens(isrcCode));
       }
     } else {
       setIsrcError(null);
+      setIsrcDisplay(null);
     }
   }, [isrcCode]);
+
+  // Handle ISRC input change to remove hyphens on blur
+  const handleIsrcBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value && value.trim() !== '') {
+      // Normalize by removing hyphens
+      const normalized = value.replace(/-/g, '').toUpperCase();
+      form.setValue('isrcCode', normalized);
+    }
+  };
 
   return (
     <>
@@ -63,7 +78,11 @@ export function RightsForm({ form, isSubmitting, onBack }: RightsFormProps) {
               <FormControl>
                 <Input 
                   placeholder="Enter ISRC if you have one" 
-                  {...field} 
+                  {...field}
+                  onBlur={(e) => {
+                    handleIsrcBlur(e);
+                    field.onBlur();
+                  }}
                   className={isrcError ? "border-red-500" : ""}
                 />
               </FormControl>
@@ -72,6 +91,10 @@ export function RightsForm({ form, isSubmitting, onBack }: RightsFormProps) {
                   <AlertCircle className="h-3.5 w-3.5 mr-1" />
                   {isrcError}
                 </p>
+              ) : isrcDisplay ? (
+                <FormDescription>
+                  Format reference: {isrcDisplay}
+                </FormDescription>
               ) : (
                 <FormDescription>
                   Leave blank if you don't have one. We'll assign one for you.
