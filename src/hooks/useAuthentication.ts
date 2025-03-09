@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { User, RegistrationConfig } from '../types/auth';
-import { currentUser as mockUser } from '../lib/mock-data';
 import { adminLogin as loginToAdmin } from '../lib/supabase';
 
 export function useAuthentication() {
@@ -19,20 +18,19 @@ export function useAuthentication() {
       throw new Error('Public login is currently disabled. Please contact an administrator for access.');
     }
     
-    // Mock login
+    // This will be replaced with actual Supabase auth in the future
     if (email && password) {
-      // Set mock user data
       setUser({
-        id: "1",
-        name: "John Doe",
+        id: Date.now().toString(),
+        name: "Artist User",
         email: email,
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user',
-        phoneNumber: mockUser.phoneNumber || '',
-        twoFactorEnabled: mockUser.twoFactorEnabled,
+        phoneNumber: '',
+        twoFactorEnabled: false,
         role: 'artist',
         createdAt: new Date().toISOString(),
-        idType: mockUser.idType,
-        verificationStatus: mockUser.verificationStatus,
+        idType: null,
+        verificationStatus: 'verified',
         deleteStatus: null,
         hasReleases: false
       });
@@ -45,14 +43,17 @@ export function useAuthentication() {
   const adminLogin = async (username: string, password: string): Promise<void> => {
     try {
       // Use the supabase admin login function
+      console.log('Calling loginToAdmin with:', username);
       const adminUser = await loginToAdmin(username, password);
       
       if (!adminUser) {
         throw new Error('Authentication failed');
       }
       
+      console.log('Admin login successful, user data:', adminUser);
+      
       setUser({
-        id: adminUser.id || "admin1",
+        id: adminUser.id,
         name: "Admin User",
         email: username,
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
@@ -83,7 +84,7 @@ export function useAuthentication() {
       throw new Error('Registration is currently invite-only');
     }
     
-    // Mock register
+    // This will be replaced with actual Supabase auth in the future
     if (name && email && password) {
       setUser({
         id: Date.now().toString(),
