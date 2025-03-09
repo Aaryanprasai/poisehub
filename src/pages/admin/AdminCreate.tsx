@@ -11,8 +11,32 @@ import { useAuth } from '@/contexts/AuthContext';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { UserPlus, ShieldAlert } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { 
+  UserPlus, 
+  ShieldAlert, 
+  Shield,
+  Users
+} from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const roleOptions = [
+  { 
+    value: 'admin', 
+    label: 'Standard Admin',
+    description: 'Can manage content, users, and support tickets' 
+  },
+  { 
+    value: 'superadmin', 
+    label: 'Super Admin',
+    description: 'Full access to all system features including admin management' 
+  }
+];
 
 const adminSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -45,9 +69,9 @@ export default function AdminCreate() {
     setTimeout(() => {
       console.log('Creating admin:', values);
       setIsSubmitting(false);
-      toast.success(`Admin user "${values.name}" created successfully`);
+      toast.success(`${values.role === 'superadmin' ? 'Super Admin' : 'Admin'} user "${values.name}" created successfully`);
       form.reset();
-      navigate('/admin/users');
+      navigate('/admin/admin-management');
     }, 1500);
   };
 
@@ -156,32 +180,44 @@ export default function AdminCreate() {
                   control={form.control}
                   name="role"
                   render={({ field }) => (
-                    <FormItem className="space-y-3">
+                    <FormItem>
                       <FormLabel>Admin Role</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex flex-col space-y-1"
-                        >
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="admin" />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              Admin - Can manage content, users, and support tickets
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="superadmin" />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              Superadmin - Full access to all system features
-                            </FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormControl>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {roleOptions.map((role) => (
+                            <SelectItem 
+                              key={role.value} 
+                              value={role.value}
+                              className="py-3"
+                            >
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  {role.value === 'admin' ? (
+                                    <Users className="h-4 w-4 text-blue-500" />
+                                  ) : (
+                                    <Shield className="h-4 w-4 text-red-500" />
+                                  )}
+                                  <span className="font-medium">{role.label}</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  {role.description}
+                                </p>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Choose the appropriate permission level
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
