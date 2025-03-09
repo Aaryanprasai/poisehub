@@ -1,4 +1,5 @@
 
+import React, { useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { Settings } from 'lucide-react';
@@ -27,7 +28,7 @@ export function RegistrationSettings() {
   });
 
   // Update form when registrationConfig changes (to handle auto-enable of invite-only)
-  React.useEffect(() => {
+  useEffect(() => {
     form.reset({
       publicRegistrationEnabled: registrationConfig.publicRegistrationEnabled,
       inviteOnlyMode: registrationConfig.inviteOnlyMode,
