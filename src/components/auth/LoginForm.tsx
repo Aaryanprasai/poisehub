@@ -134,10 +134,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         </form>
       </Form>
       
-      <div className="flex items-center">
-        <Separator className="flex-grow" />
+      <div className="flex items-center justify-center">
+        <Separator className="flex-grow max-w-[42%]" />
         <span className="px-3 text-xs text-muted-foreground">OR</span>
-        <Separator className="flex-grow" />
+        <Separator className="flex-grow max-w-[42%]" />
       </div>
       
       <Button 
