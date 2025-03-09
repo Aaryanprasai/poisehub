@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserRegistrationSettings } from "@/components/admin/settings/UserRegistrationSettings";
 import { SystemSettings } from "@/components/admin/settings/SystemSettings";
 import { SecuritySettings } from "@/components/admin/settings/SecuritySettings";
+import { IsrcSettings } from "@/components/admin/settings/IsrcSettings";
 import { useAuth } from "@/contexts/AuthContext";
 
 const AdminSettings = () => {
@@ -28,11 +29,14 @@ const AdminSettings = () => {
           onValueChange={setActiveTab}
           className="space-y-4"
         >
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-3 gap-2">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-4 gap-2">
             <TabsTrigger value="user-registration">User Registration</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
             {isSuperAdmin() && (
-              <TabsTrigger value="security">Security</TabsTrigger>
+              <>
+                <TabsTrigger value="isrc">ISRC Management</TabsTrigger>
+                <TabsTrigger value="security">Security</TabsTrigger>
+              </>
             )}
           </TabsList>
 
@@ -57,6 +61,12 @@ const AdminSettings = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {isSuperAdmin() && (
+            <TabsContent value="isrc" className="space-y-4">
+              <IsrcSettings />
+            </TabsContent>
+          )}
 
           {isSuperAdmin() && (
             <TabsContent value="security" className="space-y-4">

@@ -20,6 +20,7 @@ import { FileUploadForm } from './upload/FileUploadForm';
 import { DistributionForm } from './upload/DistributionForm';
 import { RightsForm } from './upload/RightsForm';
 import { formSchema, FormValues } from './upload/types';
+import { getNextIsrc, incrementIsrcSequence, validateIsrc } from '@/utils/isrcUtils';
 
 interface UploadFormProps {
   open: boolean;
@@ -33,6 +34,7 @@ export function UploadForm({ open, onOpenChange }: UploadFormProps) {
   const [artworkPreview, setArtworkPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentTab, setCurrentTab] = useState('details');
+  const [assignedIsrc, setAssignedIsrc] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -102,16 +104,40 @@ export function UploadForm({ open, onOpenChange }: UploadFormProps) {
       return;
     }
 
+    // Validate ISRC if provided
+    if (values.isrcCode && !validateIsrc(values.isrcCode)) {
+      toast.error('Invalid ISRC format. Should be CC-XXX-YY-NNNNN');
+      return;
+    }
+
     setIsSubmitting(true);
+
+    // Auto-assign ISRC if not provided
+    let finalValues = { ...values };
+    if (!values.isrcCode || values.isrcCode.trim() === '') {
+      const nextIsrc = getNextIsrc();
+      finalValues.isrcCode = nextIsrc;
+      setAssignedIsrc(nextIsrc);
+      
+      // In a real app, this would be done on the server
+      incrementIsrcSequence();
+    }
 
     // Simulate upload delay
     setTimeout(() => {
-      console.log('Form Values:', values);
+      console.log('Form Values:', finalValues);
       console.log('Audio File:', audioFile);
       console.log('Artwork File:', artworkFile);
       
       setIsSubmitting(false);
-      toast.success('Track uploaded successfully!');
+      
+      // Show success message with ISRC info if auto-assigned
+      if (assignedIsrc) {
+        toast.success(`Track uploaded successfully! Assigned ISRC: ${assignedIsrc}`);
+      } else {
+        toast.success('Track uploaded successfully!');
+      }
+      
       onOpenChange(false);
       
       // Reset form
@@ -119,6 +145,7 @@ export function UploadForm({ open, onOpenChange }: UploadFormProps) {
       clearAudio();
       clearArtwork();
       setCurrentTab('details');
+      setAssignedIsrc(null);
     }, 2000);
   };
 

@@ -4,9 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload } from 'lucide-react';
+import { Upload, AlertCircle } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormValues } from './types';
+import { validateIsrc } from '@/utils/isrcUtils';
+import { useState, useEffect } from 'react';
 
 interface RightsFormProps {
   form: UseFormReturn<FormValues>;
@@ -16,6 +18,21 @@ interface RightsFormProps {
 
 export function RightsForm({ form, isSubmitting, onBack }: RightsFormProps) {
   const hasPublishingRights = form.watch('hasPublishingRights');
+  const isrcCode = form.watch('isrcCode');
+  const [isrcError, setIsrcError] = useState<string | null>(null);
+
+  // Validate ISRC if provided
+  useEffect(() => {
+    if (isrcCode && isrcCode.trim() !== '') {
+      if (!validateIsrc(isrcCode)) {
+        setIsrcError('Invalid ISRC format. Should be CC-XXX-YY-NNNNN (e.g., US-ABC-23-00001)');
+      } else {
+        setIsrcError(null);
+      }
+    } else {
+      setIsrcError(null);
+    }
+  }, [isrcCode]);
 
   return (
     <>
@@ -44,16 +61,43 @@ export function RightsForm({ form, isSubmitting, onBack }: RightsFormProps) {
             <FormItem>
               <FormLabel>ISRC Code (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Enter ISRC if you have one" {...field} />
+                <Input 
+                  placeholder="Enter ISRC if you have one" 
+                  {...field} 
+                  className={isrcError ? "border-red-500" : ""}
+                />
               </FormControl>
-              <FormDescription>
-                Leave blank if you don't have one. We'll assign one for you.
-              </FormDescription>
+              {isrcError ? (
+                <p className="text-sm font-medium text-red-500 flex items-center mt-1">
+                  <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                  {isrcError}
+                </p>
+              ) : (
+                <FormDescription>
+                  Leave blank if you don't have one. We'll assign one for you.
+                </FormDescription>
+              )}
               <FormMessage />
             </FormItem>
           )}
         />
       </div>
+      
+      {!isrcCode && (
+        <div className="p-4 bg-blue-50 border border-blue-100 rounded-md mb-6">
+          <div className="flex gap-2">
+            <AlertCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+            <div>
+              <p className="text-sm text-blue-700 font-medium">
+                Automatic ISRC Assignment
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                If you leave the ISRC field empty, we'll automatically assign a unique ISRC code to your track using our standardized format.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <FormField
         control={form.control}
@@ -172,6 +216,7 @@ export function RightsForm({ form, isSubmitting, onBack }: RightsFormProps) {
           type="submit" 
           isLoading={isSubmitting}
           leftIcon={<Upload className="h-4 w-4" />}
+          disabled={!!isrcError && isrcCode !== ''}
         >
           Upload Track
         </Button>
