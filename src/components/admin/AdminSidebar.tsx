@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui-extensions/Button";
@@ -12,7 +13,8 @@ import {
   Settings,
   UserPlus,
   X,
-  PanelLeft
+  PanelLeft,
+  UserCog
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -36,6 +38,7 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }: AdminSidebarProps) => {
 
   // Super admin exclusive items
   const superAdminItems = [
+    { icon: UserCog, label: "Admin Management", href: "/admin/admin-management" },
     { icon: UserPlus, label: "Create Admin", href: "/admin/create-admin" },
   ];
 

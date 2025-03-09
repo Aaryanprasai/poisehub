@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +24,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminTracks from "./pages/admin/AdminTracks";
 import AdminCreate from "./pages/admin/AdminCreate";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminManagement from "./pages/admin/AdminManagement";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +105,11 @@ const App = () => (
             <Route path="/admin/settings" element={
               <ProtectedRoute>
                 <AdminSettings />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/admin-management" element={
+              <ProtectedRoute>
+                <AdminManagement />
               </ProtectedRoute>
             } />
             
