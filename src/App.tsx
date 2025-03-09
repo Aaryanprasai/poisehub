@@ -23,6 +23,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminTracks from "./pages/admin/AdminTracks";
 import AdminTickets from "./pages/admin/AdminTickets";
+import AdminRoyalties from "./pages/admin/AdminRoyalties";
 import AdminCreate from "./pages/admin/AdminCreate";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminManagement from "./pages/admin/AdminManagement";
@@ -101,6 +102,11 @@ const App = () => (
             <Route path="/admin/tickets" element={
               <ProtectedRoute>
                 <AdminTickets />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/royalties" element={
+              <ProtectedRoute>
+                <AdminRoyalties />
               </ProtectedRoute>
             } />
             <Route path="/admin/create-admin" element={
