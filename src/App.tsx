@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Tracks from "./pages/Tracks";
@@ -13,6 +15,7 @@ import Support from "./pages/Support";
 import Settings from "./pages/Settings";
 import Payments from "./pages/Payments"; 
 import NotFound from "./pages/NotFound";
+import VerificationPage from "./pages/VerificationPage";
 
 const queryClient = new QueryClient();
 
@@ -22,18 +25,56 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/tracks" element={<Tracks />} />
-          <Route path="/upload" element={<Upload />} />
-          <Route path="/insights" element={<Insights />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/payments" element={<Payments />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/tracks" element={
+              <ProtectedRoute>
+                <Tracks />
+              </ProtectedRoute>
+            } />
+            <Route path="/upload" element={
+              <ProtectedRoute>
+                <Upload />
+              </ProtectedRoute>
+            } />
+            <Route path="/insights" element={
+              <ProtectedRoute>
+                <Insights />
+              </ProtectedRoute>
+            } />
+            <Route path="/support" element={
+              <ProtectedRoute>
+                <Support />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/payments" element={
+              <ProtectedRoute>
+                <Payments />
+              </ProtectedRoute>
+            } />
+            <Route path="/verification" element={
+              <ProtectedRoute>
+                <VerificationPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

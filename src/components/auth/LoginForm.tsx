@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   Form,
@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { Separator } from '@/components/ui/separator';
 import { Mail } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const loginSchema = z.object({
   emailOrUsername: z.string().min(1, 'Email or username is required'),
@@ -33,6 +34,11 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isGoogleLoggingIn, setIsGoogleLoggingIn] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
+  
+  // Get the 'from' path from location state or default to dashboard
+  const from = location.state?.from || '/dashboard';
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -45,30 +51,42 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoggingIn(true);
     
-    // Simulate login delay
-    setTimeout(() => {
-      console.log('Login:', values);
-      setIsLoggingIn(false);
-      toast.success('Login successful!');
-      navigate('/dashboard');
-      if (onSuccess) {
-        onSuccess(values.emailOrUsername);
+    try {
+      const success = await login(values.emailOrUsername, values.password);
+      
+      if (success) {
+        toast.success('Login successful!');
+        navigate(from);
+        if (onSuccess) {
+          onSuccess(values.emailOrUsername);
+        }
       }
-    }, 1500);
+    } catch (error) {
+      toast.error('Login failed. Please check your credentials.');
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   const handleGoogleLogin = () => {
     setIsGoogleLoggingIn(true);
     
     // This function will be connected to real Google OAuth later
-    // For now, we're simulating the authentication flow
-    setTimeout(() => {
-      console.log('Google Login - Ready for API integration');
-      setIsGoogleLoggingIn(false);
-      toast.success('Google login successful!');
-      navigate('/dashboard');
-      if (onSuccess) {
-        onSuccess('google-user@example.com');
+    setTimeout(async () => {
+      try {
+        const success = await login('google-user@example.com', 'password');
+        
+        if (success) {
+          toast.success('Google login successful!');
+          navigate(from);
+          if (onSuccess) {
+            onSuccess('google-user@example.com');
+          }
+        }
+      } catch (error) {
+        toast.error('Google login failed. Please try again.');
+      } finally {
+        setIsGoogleLoggingIn(false);
       }
     }, 1500);
   };

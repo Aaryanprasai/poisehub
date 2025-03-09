@@ -5,13 +5,16 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui-extensions/Button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui-extensions/Card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import AppLayout from '@/components/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 
 // Profile schema
 const profileSchema = z.object({
@@ -37,7 +40,7 @@ const privacySettingsSchema = z.object({
   shareListeningActivity: z.boolean().default(false),
 });
 
-// Manage connected accounts schema
+// Connected accounts schema
 const connectedAccountsSchema = z.object({
   spotify: z.boolean().default(false),
   appleMusic: z.boolean().default(false),
@@ -45,20 +48,27 @@ const connectedAccountsSchema = z.object({
   soundcloud: z.boolean().default(false),
 });
 
+// Phone number schema
+const phoneNumberSchema = z.object({
+  phoneNumber: z.string().min(10, { message: 'Phone number must be at least 10 digits.' }),
+});
+
 type ProfileValues = z.infer<typeof profileSchema>;
 type AccountSettingsValues = z.infer<typeof accountSettingsSchema>;
 type PrivacySettingsValues = z.infer<typeof privacySettingsSchema>;
 type ConnectedAccountsValues = z.infer<typeof connectedAccountsSchema>;
+type PhoneNumberValues = z.infer<typeof phoneNumberSchema>;
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  const { user, updateUser, toggleTwoFactor, updatePhoneNumber } = useAuth();
 
   // Profile form
   const profileForm = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: 'John Doe',
-      email: 'artist@example.com',
+      name: user?.name || 'John Doe',
+      email: user?.email || 'artist@example.com',
       bio: 'Independent electronic music producer based in Los Angeles, CA.',
       website: 'https://johndoe-music.com',
     },
@@ -68,7 +78,7 @@ const Settings = () => {
   const accountSettingsForm = useForm<AccountSettingsValues>({
     resolver: zodResolver(accountSettingsSchema),
     defaultValues: {
-      twoFactorAuth: false,
+      twoFactorAuth: user?.twoFactorEnabled || false,
       emailNotifications: true,
       marketingEmails: false,
       activityDigest: true,
@@ -97,14 +107,24 @@ const Settings = () => {
     },
   });
 
+  // Phone number form
+  const phoneNumberForm = useForm<PhoneNumberValues>({
+    resolver: zodResolver(phoneNumberSchema),
+    defaultValues: {
+      phoneNumber: user?.phoneNumber || '',
+    },
+  });
+
   // Form submission handlers
   const onProfileSubmit = (data: ProfileValues) => {
-    console.log('Profile updated:', data);
-    toast.success('Profile updated successfully');
+    updateUser({
+      name: data.name,
+      email: data.email,
+    });
   };
 
   const onAccountSettingsSubmit = (data: AccountSettingsValues) => {
-    console.log('Account settings updated:', data);
+    toggleTwoFactor(data.twoFactorAuth);
     toast.success('Account settings updated successfully');
   };
 
@@ -118,6 +138,10 @@ const Settings = () => {
     toast.success('Connected accounts updated successfully');
   };
 
+  const onPhoneNumberSubmit = (data: PhoneNumberValues) => {
+    updatePhoneNumber(data.phoneNumber);
+  };
+
   return (
     <AppLayout>
       <div className="container p-4 md:p-6 max-w-6xl mx-auto">
@@ -129,9 +153,10 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="connections">Connections</TabsTrigger>
           </TabsList>
@@ -157,9 +182,9 @@ const Settings = () => {
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <CardDescription className="text-xs">
+                          <FormDescription className="text-xs">
                             This is your public display name.
-                          </CardDescription>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -174,9 +199,9 @@ const Settings = () => {
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <CardDescription className="text-xs">
+                          <FormDescription className="text-xs">
                             This email will be used for notifications and login.
-                          </CardDescription>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -191,9 +216,9 @@ const Settings = () => {
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <CardDescription className="text-xs">
+                          <FormDescription className="text-xs">
                             A brief description about you as an artist.
-                          </CardDescription>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -208,9 +233,9 @@ const Settings = () => {
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <CardDescription className="text-xs">
+                          <FormDescription className="text-xs">
                             Your personal or artist website URL.
-                          </CardDescription>
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -237,36 +262,14 @@ const Settings = () => {
                   <form onSubmit={accountSettingsForm.handleSubmit(onAccountSettingsSubmit)} className="space-y-6">
                     <FormField
                       control={accountSettingsForm.control}
-                      name="twoFactorAuth"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Two-factor Authentication</FormLabel>
-                            <CardDescription>
-                              Add an extra layer of security to your account.
-                            </CardDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              aria-readonly
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={accountSettingsForm.control}
                       name="emailNotifications"
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Email Notifications</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Receive important account updates via email.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -286,9 +289,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Marketing Emails</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Receive promotional emails about new features and offers.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -308,9 +311,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Activity Digest</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Receive weekly reports on your music performance.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -328,6 +331,92 @@ const Settings = () => {
                 </Form>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          {/* Security Settings - New Tab */}
+          <TabsContent value="security">
+            <div className="grid gap-6">
+              {/* Phone Number Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Phone Number</CardTitle>
+                  <CardDescription>
+                    Add your phone number for account recovery and two-factor authentication
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Form {...phoneNumberForm}>
+                    <form onSubmit={phoneNumberForm.handleSubmit(onPhoneNumberSubmit)} className="space-y-6">
+                      <FormField
+                        control={phoneNumberForm.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="+1 (555) 000-0000" />
+                            </FormControl>
+                            <FormDescription>
+                              Your phone number will be used for security purposes only.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit">Save Number</Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+              
+              {/* Two-Factor Authentication Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Two-Factor Authentication</CardTitle>
+                  <CardDescription>
+                    Add an extra layer of security to your account
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {!user?.phoneNumber && (
+                    <Alert variant="destructive">
+                      <Info className="h-4 w-4" />
+                      <AlertTitle>Phone Number Required</AlertTitle>
+                      <AlertDescription>
+                        You need to add a phone number before enabling two-factor authentication.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  <Form {...accountSettingsForm}>
+                    <form onSubmit={accountSettingsForm.handleSubmit(onAccountSettingsSubmit)} className="space-y-6">
+                      <FormField
+                        control={accountSettingsForm.control}
+                        name="twoFactorAuth"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Two-factor Authentication</FormLabel>
+                              <FormDescription>
+                                Receive a code on your phone each time you sign in.
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                disabled={!user?.phoneNumber}
+                                aria-readonly
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" disabled={!user?.phoneNumber}>Save Changes</Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           
           {/* Privacy Settings */}
@@ -349,9 +438,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Public Profile</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Make your profile visible to other users and platforms.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -371,9 +460,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Show Streaming Stats</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Display your streaming numbers publicly on your profile.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -393,9 +482,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Allow Tagging</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Let other users tag you in comments and posts.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -415,9 +504,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Share Listening Activity</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Share what you're listening to with your followers.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -456,9 +545,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Spotify</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Connect your Spotify artist account.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -478,9 +567,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">Apple Music</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Connect your Apple Music artist account.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -500,9 +589,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">YouTube Music</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Connect your YouTube Music channel.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
@@ -522,9 +611,9 @@ const Settings = () => {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
                             <FormLabel className="text-base">SoundCloud</FormLabel>
-                            <CardDescription>
+                            <FormDescription>
                               Connect your SoundCloud account.
-                            </CardDescription>
+                            </FormDescription>
                           </div>
                           <FormControl>
                             <Switch

@@ -12,7 +12,8 @@ import {
   User,
   Menu,
   X,
-  LogOut
+  LogOut,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui-extensions/Button';
@@ -22,6 +23,7 @@ import {
   AvatarFallback 
 } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -55,18 +57,14 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, logout } = useAuth();
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
   const handleLogout = () => {
-    // In a real app, you would call your auth logout function here
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-    navigate('/');
+    logout();
   };
 
   const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +92,24 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     { icon: Wallet, label: 'Payments', href: '/payments' },
     { icon: MessageSquare, label: 'Support', href: '/support' },
     { icon: Settings, label: 'Settings', href: '/settings' },
+    { icon: ShieldCheck, label: 'Verification', href: '/verification' },
   ];
+
+  // Display verification status badge if applicable
+  const renderVerificationBadge = () => {
+    if (!user) return null;
+    
+    switch (user.verificationStatus) {
+      case 'pending':
+        return <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">Verification Pending</span>;
+      case 'verified':
+        return <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">Verified</span>;
+      case 'rejected':
+        return <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">Verification Rejected</span>;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -161,38 +176,41 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         </div>
         
         <div className="border-t p-4">
-          <div className="flex items-center gap-3">
-            <label className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary cursor-pointer overflow-hidden hover:opacity-90 transition-opacity">
-              {profileImage ? (
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={profileImage} alt="Profile picture" />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-              ) : (
-                <>
-                  <User className="h-5 w-5" />
-                  <span className="sr-only">Upload profile picture</span>
-                </>
-              )}
-              <input 
-                type="file" 
-                accept="image/*" 
-                className="absolute inset-0 opacity-0 cursor-pointer" 
-                onChange={handleProfileImageChange}
-              />
-            </label>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">John Doe</p>
-              <p className="text-xs text-muted-foreground truncate">artist@example.com</p>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <label className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary cursor-pointer overflow-hidden hover:opacity-90 transition-opacity">
+                {profileImage || user?.avatar ? (
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={profileImage || user?.avatar || ''} alt="Profile picture" />
+                    <AvatarFallback>{user?.name.substring(0, 2) || 'JD'}</AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <>
+                    <User className="h-5 w-5" />
+                    <span className="sr-only">Upload profile picture</span>
+                  </>
+                )}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="absolute inset-0 opacity-0 cursor-pointer" 
+                  onChange={handleProfileImageChange}
+                />
+              </label>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{user?.name || 'John Doe'}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email || 'artist@example.com'}</p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={handleLogout}
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={handleLogout}
-              title="Logout"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
+            {renderVerificationBadge()}
           </div>
         </div>
       </div>
