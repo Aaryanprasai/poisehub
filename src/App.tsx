@@ -17,6 +17,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminTracks from './pages/admin/AdminTracks';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminLogin from './pages/admin/AdminLogin';
+import AdminManagement from './pages/admin/AdminManagement';
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ function App() {
               <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
               <Route path="/admin/tracks" element={<AdminProtectedRoute><AdminTracks /></AdminProtectedRoute>} />
               <Route path="/admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
+              <Route path="/admin/admins" element={<AdminProtectedRoute requireSuperAdmin={true}><AdminManagement /></AdminProtectedRoute>} />
             </Routes>
             <Toaster />
           </Router>
