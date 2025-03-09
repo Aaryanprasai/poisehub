@@ -1,32 +1,50 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { useUserContext, UserProvider } from './UserContext';
-import { useAdminContext, AdminProvider } from './AdminContext';
-import { useRegistrationContext, RegistrationProvider } from './RegistrationContext';
-import { User } from '@/lib/types';
 
-// Re-export the user type for convenience
-export type { User } from '@/lib/types';
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  phoneNumber: string;
+  twoFactorEnabled: boolean;
+  role: string;
+  createdAt: string;
+  idType?: 'passport' | 'drivers_license' | 'national_id' | 'personal' | 'business' | null;
+  idDocument?: File | null;
+  businessDocument?: File | null;
+  taxDocument?: File | null;
+  verificationStatus: 'unverified' | 'pending' | 'verified' | 'rejected';
+  deleteStatus?: 'pending' | 'approved' | null;
+  hasReleases?: boolean;
+}
 
-// Define the core authentication context
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, idType: 'personal' | 'business') => Promise<void>;
   logout: () => void;
-  isAdmin: () => boolean;
-  isSuperAdmin: () => boolean;
+  updateUser: (userData: Partial<User>) => void;
+  toggleTwoFactor?: (enabled: boolean) => void;
+  updatePhoneNumber?: (phoneNumber: string) => void;
+  uploadVerificationDocuments?: (
+    idType: 'personal' | 'business',
+    idDocument: string,
+    businessDocument: string,
+    taxDocument: string
+  ) => void;
+  requestAccountDeletion: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Combined provider that wraps all our context providers
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (email: string, password: string): Promise<void> => {
     // Mock login - in a real app, this would call an API
+    // For demo purposes, we're setting a fake user
     setUser({
       id: '1',
       name: 'Demo User',
@@ -41,16 +59,74 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } as User);
   };
 
+  const register = async (name: string, email: string, password: string, idType: 'personal' | 'business'): Promise<void> => {
+    // Mock registration - in a real app, this would call an API
+    setUser({
+      id: '1',
+      name: name,
+      email: email,
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=new',
+      phoneNumber: '',
+      twoFactorEnabled: false,
+      role: 'artist',
+      createdAt: new Date().toISOString(),
+      verificationStatus: 'unverified',
+      idType: idType,
+      hasReleases: false
+    } as User);
+  };
+
   const logout = () => {
     setUser(null);
   };
 
-  const isAdmin = () => {
-    return user?.role === 'admin' || user?.role === 'superadmin';
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      setUser({ ...user, ...userData });
+    }
   };
 
-  const isSuperAdmin = () => {
-    return user?.role === 'superadmin';
+  const toggleTwoFactor = (enabled: boolean) => {
+    if (user) {
+      setUser({ ...user, twoFactorEnabled: enabled });
+    }
+  };
+
+  const updatePhoneNumber = (phoneNumber: string) => {
+    if (user) {
+      setUser({ ...user, phoneNumber });
+    }
+  };
+
+  const uploadVerificationDocuments = (
+    idType: 'personal' | 'business',
+    idDocument: string,
+    businessDocument: string,
+    taxDocument: string
+  ) => {
+    if (user) {
+      setUser({
+        ...user,
+        idType,
+        verificationStatus: 'pending'
+      });
+    }
+  };
+
+  const requestAccountDeletion = () => {
+    if (user) {
+      // If user has releases, set delete status to pending for admin approval
+      // Otherwise, we could immediately delete the account (logout in this demo)
+      if (user.hasReleases) {
+        setUser({
+          ...user,
+          deleteStatus: 'pending'
+        });
+      } else {
+        // Immediately delete account (logout in this demo)
+        logout();
+      }
+    }
   };
 
   return (
@@ -60,39 +136,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         isLoggedIn: !!user,
         login,
+        register,
         logout,
-        isAdmin,
-        isSuperAdmin,
+        updateUser,
+        toggleTwoFactor,
+        updatePhoneNumber,
+        uploadVerificationDocuments,
+        requestAccountDeletion
       }}
     >
-      <UserProvider user={user} setUser={setUser}>
-        <AdminProvider user={user} setUser={setUser}>
-          <RegistrationProvider>
-            {children}
-          </RegistrationProvider>
-        </AdminProvider>
-      </UserProvider>
+      {children}
     </AuthContext.Provider>
   );
 }
 
-// Custom hook to use auth context
 export function useAuth() {
   const context = useContext(AuthContext);
-  
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
-  // Combine all contexts
-  const userContext = useUserContext();
-  const adminContext = useAdminContext();
-  const registrationContext = useRegistrationContext();
-  
-  return {
-    ...context,
-    ...userContext,
-    ...adminContext,
-    ...registrationContext,
-  };
+  return context;
 }
