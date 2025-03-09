@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import {
   Form,
@@ -17,6 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAuth } from '@/contexts/AuthContext';
+import { AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -39,7 +41,17 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [isRegistering, setIsRegistering] = useState(false);
-  const { register } = useAuth();
+  const { register, registrationConfig } = useAuth();
+  const [canRegister, setCanRegister] = useState<boolean>(false);
+
+  // Check if registration is allowed
+  useEffect(() => {
+    const isRegistrationEnabled = 
+      registrationConfig.publicRegistrationEnabled && 
+      !registrationConfig.inviteOnlyMode;
+    
+    setCanRegister(isRegistrationEnabled);
+  }, [registrationConfig]);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -53,6 +65,11 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
+    if (!canRegister) {
+      toast.error('Registration is currently not available');
+      return;
+    }
+
     setIsRegistering(true);
     
     try {
@@ -71,6 +88,18 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       setIsRegistering(false);
     }
   };
+
+  if (!canRegister) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Registration Unavailable</AlertTitle>
+        <AlertDescription>
+          Public registration is currently disabled. Please contact an administrator for an invitation.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <Form {...form}>

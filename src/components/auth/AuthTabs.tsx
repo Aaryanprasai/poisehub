@@ -1,33 +1,32 @@
 
-import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CardContent } from '@/components/ui-extensions/Card';
-import { LoginForm } from './LoginForm';
-import { RegisterForm } from './RegisterForm';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoginForm } from "./LoginForm";
+import { RegisterForm } from "./RegisterForm";
+import { useAuth } from "@/contexts/AuthContext";
 
-export function AuthTabs() {
-  const [activeTab, setActiveTab] = useState('login');
-  
-  const handleRegisterSuccess = (email: string) => {
-    setActiveTab('login');
-  };
+interface AuthTabsProps {
+  onSuccess?: (email: string) => void;
+  defaultTab?: string;
+}
+
+export function AuthTabs({ onSuccess, defaultTab = "login" }: AuthTabsProps) {
+  const { registrationConfig } = useAuth();
+  const canRegister = registrationConfig.publicRegistrationEnabled && !registrationConfig.inviteOnlyMode;
 
   return (
-    <CardContent>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="login">Login</TabsTrigger>
-          <TabsTrigger value="register">Register</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="login" className="mt-0">
-          <LoginForm />
+    <Tabs defaultValue={defaultTab} className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="login">Login</TabsTrigger>
+        {canRegister && <TabsTrigger value="register">Register</TabsTrigger>}
+      </TabsList>
+      <TabsContent value="login" className="mt-6">
+        <LoginForm onSuccess={onSuccess} />
+      </TabsContent>
+      {canRegister && (
+        <TabsContent value="register" className="mt-6">
+          <RegisterForm onSuccess={onSuccess} />
         </TabsContent>
-        
-        <TabsContent value="register" className="mt-0">
-          <RegisterForm onSuccess={handleRegisterSuccess} />
-        </TabsContent>
-      </Tabs>
-    </CardContent>
+      )}
+    </Tabs>
   );
 }
