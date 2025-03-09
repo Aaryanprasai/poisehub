@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Handler for inactivity timeout
   const handleTimeout = () => {
-    setUser(null);
+    logout();
   };
 
   // Inactivity tracking
@@ -50,22 +50,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = () => checkIsAdmin(user);
   const isSuperAdmin = () => checkIsSuperAdmin(user);
 
+  const value = {
+    user,
+    currentUser: user,
+    isAuthenticated: !!user,
+    isLoggedIn: !!user,
+    login,
+    logout,
+    isAdmin,
+    isSuperAdmin,
+    adminLogin,
+    verifyAdminOTP,
+    adminOTPRequired,
+  };
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        currentUser: user,
-        isAuthenticated: !!user,
-        isLoggedIn: !!user,
-        login,
-        logout,
-        isAdmin,
-        isSuperAdmin,
-        adminLogin,
-        verifyAdminOTP,
-        adminOTPRequired,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       <UserProvider user={user} setUser={setUser}>
         <AdminProvider user={user} setUser={setUser}>
           <RegistrationProvider>
