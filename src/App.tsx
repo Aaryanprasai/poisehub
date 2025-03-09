@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Tracks from "./pages/Tracks";
+import Upload from "./pages/Upload";
 import Insights from "./pages/Insights";
 import Support from "./pages/Support";
 import Settings from "./pages/Settings";
@@ -25,7 +26,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/tracks" element={<Tracks />} />
-          <Route path="/upload" element={<Tracks />} />
+          <Route path="/upload" element={<Upload />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/support" element={<Support />} />
           <Route path="/settings" element={<Settings />} />
