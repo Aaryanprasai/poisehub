@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useNavigate } from 'react-router-dom';
 import { currentUser as mockUser } from '@/lib/mock-data';
 import { toast } from 'sonner';
+import { User as UserType } from '@/lib/types';
 
 interface User {
   id: string;
@@ -57,9 +58,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // For demo, we use a simulated delay and mock data
     return new Promise<boolean>((resolve) => {
       setTimeout(() => {
-        const updatedUser = { 
+        const updatedUser: User = { 
           ...mockUser, 
-          isLoggedIn: true 
+          isLoggedIn: true,
+          verificationStatus: mockUser.verificationStatus as 'unverified' | 'pending' | 'verified' | 'rejected'
         };
         
         setUser(updatedUser);
