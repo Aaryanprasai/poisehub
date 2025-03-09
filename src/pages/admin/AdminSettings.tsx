@@ -32,11 +32,9 @@ const AdminSettings = () => {
           <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2 md:grid-cols-4 gap-2">
             <TabsTrigger value="user-registration">User Registration</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
+            <TabsTrigger value="isrc">ISRC Management</TabsTrigger>
             {isSuperAdmin() && (
-              <>
-                <TabsTrigger value="isrc">ISRC Management</TabsTrigger>
-                <TabsTrigger value="security">Security</TabsTrigger>
-              </>
+              <TabsTrigger value="security">Security</TabsTrigger>
             )}
           </TabsList>
 
@@ -62,11 +60,9 @@ const AdminSettings = () => {
             </Card>
           </TabsContent>
 
-          {isSuperAdmin() && (
-            <TabsContent value="isrc" className="space-y-4">
-              <IsrcSettings />
-            </TabsContent>
-          )}
+          <TabsContent value="isrc" className="space-y-4">
+            <IsrcSettings />
+          </TabsContent>
 
           {isSuperAdmin() && (
             <TabsContent value="security" className="space-y-4">
