@@ -1,6 +1,5 @@
 
 import { ReactNode } from 'react';
-import { Music } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -20,8 +19,12 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       <div className="animate-fade-in w-full max-w-md">
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-2">
-            <Music className="w-10 h-10 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Beat Echo</h1>
+            <img 
+              src="/lovable-uploads/0e7944a1-7691-4813-a45b-831d6f5e1e44.png" 
+              alt="Poise Logo" 
+              className="h-10 w-auto"
+            />
+            <h1 className="text-3xl font-bold tracking-tight">Poise</h1>
           </div>
         </div>
 

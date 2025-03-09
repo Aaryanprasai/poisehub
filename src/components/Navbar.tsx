@@ -59,9 +59,16 @@ export function Navbar() {
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground">
         <div className="p-6">
-          <h1 className="text-xl font-bold tracking-tight">
-            Beat Echo
-          </h1>
+          <div className="flex items-center gap-2">
+            <img 
+              src="/lovable-uploads/0e7944a1-7691-4813-a45b-831d6f5e1e44.png" 
+              alt="Poise Logo" 
+              className="h-6 w-auto"
+            />
+            <h1 className="text-xl font-bold tracking-tight">
+              Poise
+            </h1>
+          </div>
         </div>
         
         <nav className="flex-1 px-4 space-y-1">
@@ -115,7 +122,14 @@ export function Navbar() {
         isScrolled ? "bg-background/80 backdrop-blur-md shadow-sm" : "bg-transparent"
       )}>
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold">Beat Echo</h1>
+          <div className="flex items-center gap-2">
+            <img 
+              src="/lovable-uploads/0e7944a1-7691-4813-a45b-831d6f5e1e44.png" 
+              alt="Poise Logo" 
+              className="h-6 w-auto"
+            />
+            <h1 className="text-xl font-bold">Poise</h1>
+          </div>
           
           <Button 
             variant="ghost" 

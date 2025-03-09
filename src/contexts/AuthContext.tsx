@@ -1,168 +1,102 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { currentUser as mockUser } from '@/lib/mock-data';
-import { toast } from 'sonner';
-import { User as UserType } from '@/lib/types';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-// Extended User interface that includes verification properties
 interface User {
   id: string;
   name: string;
   email: string;
-  avatar: string | null;
-  isLoggedIn: boolean;
+  avatar: string;
   phoneNumber: string;
   twoFactorEnabled: boolean;
+  role: string; // Adding the required role property
+  createdAt: string; // Adding the required createdAt property
+  idType?: 'passport' | 'drivers_license' | 'national_id' | null;
+  idDocument?: File | null;
+  businessDocument?: File | null;
+  taxDocument?: File | null;
   verificationStatus: 'unverified' | 'pending' | 'verified' | 'rejected';
-  idType: 'personal' | 'business' | null;
-  idDocument: string | null;
-  businessDocument: string | null;
-  taxDocument: string | null;
-  role: "artist" | "admin";
-  createdAt: Date;
 }
 
 interface AuthContextType {
   user: User | null;
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  isLoggedIn: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
   updateUser: (userData: Partial<User>) => void;
-  updatePhoneNumber: (phoneNumber: string) => void;
-  toggleTwoFactor: (enabled: boolean) => void;
-  uploadVerificationDocuments: (
-    idType: 'personal' | 'business',
-    idDocument: string,
-    businessDocument?: string,
-    taxDocument?: string
-  ) => void;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const navigate = useNavigate();
-
-  // Check local storage for user data on initial load
-  useEffect(() => {
-    const storedUser = localStorage.getItem('beatEchoUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-  
-  const isAuthenticated = !!user?.isLoggedIn;
 
   const login = async (email: string, password: string) => {
-    // This would be an API call in a real app
-    // For demo, we use a simulated delay and mock data
-    return new Promise<boolean>((resolve) => {
-      setTimeout(() => {
-        const updatedUser: User = { 
-          ...mockUser, 
-          isLoggedIn: true,
-          verificationStatus: mockUser.verificationStatus as 'unverified' | 'pending' | 'verified' | 'rejected'
-        };
-        
-        setUser(updatedUser);
-        localStorage.setItem('beatEchoUser', JSON.stringify(updatedUser));
-        resolve(true);
-      }, 1000);
-    });
+    // Mock login - in a real app, this would call an API
+    // For demo purposes, we're setting a fake user
+    setUser({
+      isLoggedIn: true,
+      verificationStatus: 'unverified',
+      id: '1',
+      name: 'Demo User',
+      email: email,
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo',
+      phoneNumber: '+1234567890',
+      twoFactorEnabled: false,
+      role: 'artist', // Adding role value
+      createdAt: new Date().toISOString(), // Adding createdAt value
+    } as User);
+    
+    return Promise.resolve();
   };
 
   const register = async (name: string, email: string, password: string) => {
-    // This would be an API call in a real app
-    return new Promise<boolean>((resolve) => {
-      setTimeout(() => {
-        const newUser = {
-          ...mockUser,
-          id: Math.random().toString(36).substring(7),
-          name,
-          email,
-          isLoggedIn: false,
-        };
-        resolve(true);
-      }, 1000);
-    });
+    // Mock registration - in a real app, this would call an API
+    setUser({
+      isLoggedIn: true,
+      verificationStatus: 'unverified',
+      id: '1',
+      name: name,
+      email: email,
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=new',
+      phoneNumber: '',
+      twoFactorEnabled: false,
+      role: 'artist', // Adding role value
+      createdAt: new Date().toISOString(), // Adding createdAt value
+    } as User);
+    
+    return Promise.resolve();
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('beatEchoUser');
-    navigate('/');
-    toast.success('You have been logged out');
   };
 
   const updateUser = (userData: Partial<User>) => {
     if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem('beatEchoUser', JSON.stringify(updatedUser));
-      toast.success('Profile updated successfully');
-    }
-  };
-
-  const updatePhoneNumber = (phoneNumber: string) => {
-    if (user) {
-      updateUser({ phoneNumber });
-      toast.success('Phone number updated successfully');
-    }
-  };
-
-  const toggleTwoFactor = (enabled: boolean) => {
-    if (user) {
-      updateUser({ twoFactorEnabled: enabled });
-      toast.success(enabled ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled');
-    }
-  };
-
-  const uploadVerificationDocuments = (
-    idType: 'personal' | 'business', 
-    idDocument: string, 
-    businessDocument?: string, 
-    taxDocument?: string
-  ) => {
-    if (user) {
-      const updates: Partial<User> = {
-        idType,
-        idDocument,
-        verificationStatus: 'pending',
-      };
-      
-      if (idType === 'business') {
-        updates.businessDocument = businessDocument || null;
-        updates.taxDocument = taxDocument || null;
-      }
-      
-      updateUser(updates);
-      toast.success('Verification documents submitted for review');
+      setUser({ ...user, ...userData });
     }
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
-      login, 
-      logout, 
-      register,
-      updateUser,
-      updatePhoneNumber,
-      toggleTwoFactor,
-      uploadVerificationDocuments
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoggedIn: !!user,
+        login,
+        register,
+        logout,
+        updateUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}
