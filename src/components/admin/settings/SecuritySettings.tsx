@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Save, Shield, LockOff } from "lucide-react";
+import { Save, Shield, LockOpen } from "lucide-react";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -214,7 +214,7 @@ export function SecuritySettings() {
               form.setValue("publicLoginEnabled", true);
               form.handleSubmit(onSubmit)();
             }}
-            leftIcon={<LockOff className="h-4 w-4" />}
+            leftIcon={<LockOpen className="h-4 w-4" />}
           >
             Re-enable Public Login
           </Button>
