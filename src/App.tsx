@@ -24,6 +24,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminTracks from "./pages/admin/AdminTracks";
 import AdminTickets from "./pages/admin/AdminTickets";
 import AdminRoyalties from "./pages/admin/AdminRoyalties";
+import AdminDeletionRequests from "./pages/admin/AdminDeletionRequests";
 import AdminCreate from "./pages/admin/AdminCreate";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminManagement from "./pages/admin/AdminManagement";
@@ -107,6 +108,11 @@ const App = () => (
             <Route path="/admin/royalties" element={
               <ProtectedRoute>
                 <AdminRoyalties />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/deletion-requests" element={
+              <ProtectedRoute>
+                <AdminDeletionRequests />
               </ProtectedRoute>
             } />
             <Route path="/admin/create-admin" element={
