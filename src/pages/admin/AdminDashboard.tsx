@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui-extensions/Card';
 import { Button } from '@/components/ui-extensions/Button';
 import { 
-  ShieldAlert, 
   LogOut, 
   UserPlus,
   FileSpreadsheet
@@ -31,29 +30,6 @@ export default function AdminDashboard() {
     logout();
     navigate('/');
   };
-
-  // For development - temporarily disable admin check
-  const authEnabled = false;
-
-  // Only check admin access if auth is enabled
-  if (authEnabled && !isAdmin()) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center">Access Denied</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center space-y-4">
-            <ShieldAlert className="h-16 w-16 text-red-500" />
-            <p className="text-center">You don't have permission to access the admin panel.</p>
-            <Button onClick={() => navigate('/dashboard')}>
-              Return to Dashboard
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <AdminLayout>

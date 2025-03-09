@@ -41,8 +41,8 @@ const AdminSettings = () => {
       toast.success('Settings saved successfully');
       
       if (data.requireAdminAuth) {
-        toast.info('Authentication requirement will take effect after page reload', {
-          description: 'This is currently disabled for development'
+        toast.info('Authentication requirement will be implemented when API is connected', {
+          description: 'Authentication is currently simplified for development'
         });
       }
     }, 800);
@@ -79,7 +79,7 @@ const AdminSettings = () => {
                             When enabled, users must authenticate to access admin features.
                             <br />
                             <span className="text-yellow-600 font-medium">
-                              Currently disabled for development
+                              Currently simplified for development. Will be fully implemented with API.
                             </span>
                           </FormDescription>
                         </div>
@@ -145,7 +145,7 @@ const AdminSettings = () => {
                   This section will allow you to configure authentication APIs when they're implemented.
                 </p>
                 <p className="text-slate-600 text-sm">
-                  Authentication is currently disabled for development, but this section will contain:
+                  Authentication is currently simplified for development, but this section will contain:
                 </p>
                 <ul className="list-disc list-inside text-sm text-slate-600 mt-2 space-y-1">
                   <li>API endpoint configuration</li>

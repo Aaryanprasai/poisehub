@@ -5,7 +5,6 @@ import { useAdminContext, AdminProvider } from './AdminContext';
 import { useRegistrationContext, RegistrationProvider } from './RegistrationContext';
 import { User } from '@/lib/types';
 import { useUserAuth } from '@/auth/userAuth';
-import { useAdminAuth } from '@/auth/adminAuth';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 
 // Re-export the user type for convenience
@@ -14,6 +13,7 @@ export type { User } from '@/lib/types';
 // Define the core authentication context
 interface AuthContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   currentUser: User | null;
   isAuthenticated: boolean;
   isLoggedIn: boolean;
@@ -21,9 +21,6 @@ interface AuthContextType {
   logout: () => void;
   isAdmin: () => boolean;
   isSuperAdmin: () => boolean;
-  adminLogin: (username: string, password: string) => Promise<void>;
-  verifyAdminOTP: (otp: string) => Promise<void>;
-  adminOTPRequired: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,9 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // User authentication hooks
   const { login, logout, isAdmin: checkIsAdmin, isSuperAdmin: checkIsSuperAdmin } = useUserAuth(setUser);
   
-  // Admin authentication hooks
-  const { adminOTPRequired, adminLogin, verifyAdminOTP } = useAdminAuth(setUser);
-
   // Handler for inactivity timeout
   const handleTimeout = () => {
     logout();
@@ -52,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = {
     user,
+    setUser,
     currentUser: user,
     isAuthenticated: !!user,
     isLoggedIn: !!user,
@@ -59,9 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     isAdmin,
     isSuperAdmin,
-    adminLogin,
-    verifyAdminOTP,
-    adminOTPRequired,
   };
 
   return (
