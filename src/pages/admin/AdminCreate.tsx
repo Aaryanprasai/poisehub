@@ -119,7 +119,7 @@ export default function AdminCreate() {
                       <FormControl>
                         <Input 
                           type="email" 
-                          placeholder="admin@beatecho.com" 
+                          placeholder="admin@poisemusic.com" 
                           {...field} 
                         />
                       </FormControl>

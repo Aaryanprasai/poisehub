@@ -41,7 +41,7 @@ export function AdminProvider({ children, user, setUser }: AdminProviderProps) {
       setUser({
         id: 'admin1',
         name: 'Poise Admin',
-        email: adminLoginEmail + '@poise.com',
+        email: adminLoginEmail + '@poisemusic.com',
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
         phoneNumber: '+1234567890',
         twoFactorEnabled: true,
