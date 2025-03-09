@@ -37,6 +37,8 @@ serve(async (req) => {
       )
     }
 
+    console.log(`Attempting to verify login for ${username}`)
+
     // Call the verify_admin_login function
     const { data, error } = await supabase
       .rpc('verify_admin_login', { 
@@ -54,11 +56,14 @@ serve(async (req) => {
 
     // Check if any user was returned
     if (!data || data.length === 0) {
+      console.log("No matching user found")
       return new Response(
         JSON.stringify({ success: false, error: "Invalid credentials" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
       )
     }
+
+    console.log("Admin login successful:", data[0])
 
     return new Response(
       JSON.stringify({ 

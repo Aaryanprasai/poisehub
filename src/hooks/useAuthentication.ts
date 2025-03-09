@@ -45,16 +45,20 @@ export function useAuthentication() {
   const adminLogin = async (username: string, password: string): Promise<void> => {
     try {
       // Use the supabase admin login function
-      await loginToAdmin(username, password);
+      const adminUser = await loginToAdmin(username, password);
+      
+      if (!adminUser) {
+        throw new Error('Authentication failed');
+      }
       
       setUser({
-        id: "admin1",
+        id: adminUser.id || "admin1",
         name: "Admin User",
-        email: username.includes('@') ? username : `${username}@beatecho.com`,
+        email: username,
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
         phoneNumber: '',
         twoFactorEnabled: false,
-        role: 'admin',
+        role: adminUser.is_superadmin ? 'superadmin' : 'admin',
         createdAt: new Date().toISOString(),
         idType: null,
         verificationStatus: 'verified',
@@ -63,6 +67,7 @@ export function useAuthentication() {
       });
       return Promise.resolve();
     } catch (error) {
+      console.error('Admin login error:', error);
       throw error;
     }
   };

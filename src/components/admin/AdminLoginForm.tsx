@@ -62,7 +62,7 @@ export function AdminLoginForm() {
     setIsLoggingIn(true);
     
     try {
-      const adminUser = await loginToAdmin(values.username, values.password);
+      console.log('Attempting admin login with:', values.username);
       
       // Use the adminLogin function from AuthContext to set the user in the app state
       await adminLogin(values.username, values.password);

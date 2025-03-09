@@ -14,12 +14,18 @@ export const supabaseAdmin = supabase;
 // Call the admin authentication edge function
 export const adminLogin = async (username: string, password: string) => {
   try {
+    console.log(`Calling admin-auth function with username: ${username}`);
+    
     const response = await supabase.functions.invoke('admin-auth', {
       body: { username, password },
     });
 
+    console.log('Admin auth response:', response);
+
     if (!response.data?.success) {
-      throw new Error(response.data?.error || 'Authentication failed');
+      const errorMessage = response.data?.error || 'Authentication failed';
+      console.error('Admin auth error:', errorMessage);
+      throw new Error(errorMessage);
     }
 
     return response.data.user;
