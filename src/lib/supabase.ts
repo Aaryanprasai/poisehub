@@ -42,3 +42,17 @@ export const requestAdminPasswordReset = async (email: string) => {
     throw error;
   }
 };
+
+// Verify reset token and set new password
+export const verifyAdminReset = async (token: string, newPassword: string) => {
+  try {
+    const response = await supabase.functions.invoke('admin-verify-reset', {
+      body: { token, newPassword },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Admin reset verification error:', error);
+    throw error;
+  }
+};

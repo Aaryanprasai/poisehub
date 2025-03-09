@@ -8,10 +8,11 @@ import { toast } from 'sonner';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
-import { ShieldCheck, Mail } from 'lucide-react';
+import { ShieldCheck, Mail, Link } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { adminLogin as loginToAdmin, requestAdminPasswordReset } from '@/lib/supabase';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const adminLoginSchema = z.object({
   username: z
@@ -38,6 +39,7 @@ export function AdminLoginForm() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [resetLink, setResetLink] = useState<string | null>(null);
   const navigate = useNavigate();
   const { adminLogin } = useAuth();
 
@@ -80,10 +82,14 @@ export function AdminLoginForm() {
     setIsResetting(true);
     
     try {
-      await requestAdminPasswordReset(values.email);
-      toast.success('If your email exists in our system, you will receive password reset instructions');
-      setIsResetOpen(false);
-      resetForm.reset();
+      const response = await requestAdminPasswordReset(values.email);
+      
+      if (response.success && response.resetLink) {
+        setResetLink(response.resetLink);
+      } else {
+        // For security, we still show a success message even if the email doesn't exist
+        toast.success('If your email exists in our system, you will receive password reset instructions');
+      }
     } catch (error) {
       console.error('Password reset error:', error);
       // Don't reveal if the email exists or not for security
@@ -91,6 +97,15 @@ export function AdminLoginForm() {
     } finally {
       setIsResetting(false);
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success('Reset link copied to clipboard');
+    }).catch((err) => {
+      console.error('Failed to copy link:', err);
+      toast.error('Failed to copy link');
+    });
   };
 
   return (
@@ -157,37 +172,78 @@ export function AdminLoginForm() {
                 Enter your @poisemusic.com email to receive password reset instructions.
               </DialogDescription>
             </DialogHeader>
-            <Form {...resetForm}>
-              <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
-                <FormField
-                  control={resetForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="admin@poisemusic.com" 
-                          type="email"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <DialogFooter>
+            {resetLink ? (
+              <div className="space-y-4">
+                <Alert>
+                  <AlertDescription>
+                    A temporary reset link has been generated. In a production environment,
+                    this would be sent via email, but for development purposes, you can use the link below:
+                  </AlertDescription>
+                </Alert>
+                <div className="p-2 bg-secondary rounded-md flex items-center justify-between gap-2 break-all">
+                  <span className="text-xs font-mono">{resetLink}</span>
                   <Button 
-                    type="submit" 
-                    className="w-full" 
-                    isLoading={isResetting}
-                    leftIcon={<Mail className="h-4 w-4" />}
+                    variant="outline" 
+                    size="sm" 
+                    className="shrink-0" 
+                    onClick={() => copyToClipboard(resetLink)}
                   >
-                    Send Reset Instructions
+                    <Link className="h-4 w-4" />
                   </Button>
-                </DialogFooter>
-              </form>
-            </Form>
+                </div>
+                <Button 
+                  className="w-full" 
+                  onClick={() => {
+                    window.open(resetLink, '_blank');
+                  }}
+                >
+                  Open Reset Link
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => {
+                    setResetLink(null);
+                    resetForm.reset();
+                    setIsResetOpen(false);
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            ) : (
+              <Form {...resetForm}>
+                <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
+                  <FormField
+                    control={resetForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="admin@poisemusic.com" 
+                            type="email"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <DialogFooter>
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      isLoading={isResetting}
+                      leftIcon={<Mail className="h-4 w-4" />}
+                    >
+                      Send Reset Instructions
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            )}
           </DialogContent>
         </Dialog>
       </div>

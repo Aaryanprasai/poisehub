@@ -51,18 +51,43 @@ serve(async (req) => {
       )
     }
 
-    // In a real implementation, you would:
-    // 1. Generate a secure reset token
-    // 2. Store it in the database with an expiration time
-    // 3. Send an email with a reset link
+    // Generate a random token
+    const resetToken = crypto.randomUUID()
     
-    // For this demonstration, we'll just return a success message
-    // In a production environment, you would integrate with an email service
+    // Set an expiration time (e.g., 1 hour from now)
+    const expiresAt = new Date()
+    expiresAt.setHours(expiresAt.getHours() + 1)
+    
+    // Store the reset token in the database
+    const { error: resetError } = await supabase
+      .from('admin_reset_tokens')
+      .insert({
+        admin_id: adminData.id,
+        token: resetToken,
+        expires_at: expiresAt.toISOString(),
+        used: false
+      })
+    
+    if (resetError) {
+      console.error("Error creating reset token:", resetError)
+      return new Response(
+        JSON.stringify({ success: false, error: "Failed to create reset token" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      )
+    }
+    
+    // Generate the reset link
+    const baseUrl = Deno.env.get("FRONTEND_URL") || "http://localhost:3000"
+    const resetLink = `${baseUrl}/admin/reset-password?token=${resetToken}`
+    
+    // In a real implementation, you would send the link via email
+    // For this demonstration, we'll just return the link
     
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "If your email exists in our system, you will receive password reset instructions"
+        message: "Password reset link generated",
+        resetLink: resetLink
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     )
