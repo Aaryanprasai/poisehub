@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
@@ -27,11 +27,26 @@ export function UserRegistrationSettings() {
     },
   });
 
+  // Effect to automatically enable invite-only mode when public registration is disabled
+  useEffect(() => {
+    const publicRegistrationEnabled = form.watch("publicRegistrationEnabled");
+    
+    if (!publicRegistrationEnabled) {
+      form.setValue("inviteOnlyMode", true);
+    }
+  }, [form.watch("publicRegistrationEnabled"), form]);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSaving(true);
     try {
+      // If public registration is disabled, force invite-only mode to be true
+      const updatedValues = {
+        ...values,
+        inviteOnlyMode: values.publicRegistrationEnabled ? values.inviteOnlyMode : true
+      };
+      
       // In a real app, this would be an API call
-      updateRegistrationConfig(values);
+      updateRegistrationConfig(updatedValues);
       toast.success("Registration settings updated successfully");
     } catch (error) {
       toast.error("Failed to update registration settings");
@@ -78,7 +93,7 @@ export function UserRegistrationSettings() {
                 </div>
                 <FormControl>
                   <Switch
-                    checked={field.value}
+                    checked={!form.watch("publicRegistrationEnabled") || field.value}
                     onCheckedChange={field.onChange}
                     disabled={!form.watch("publicRegistrationEnabled")}
                   />
