@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Track } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui-extensions/Card';
@@ -183,7 +182,7 @@ export function TrackCard({ track, onEdit, onDelete, onTakedown, onRestore }: Tr
                     
                     {!isDeletable && (
                       <DropdownMenuItem className="text-muted-foreground cursor-not-allowed">
-                        Delete (Available in {Math.ceil((90 - ((new Date().getTime() - new Date(track.takenDownAt!).getTime()) / (24 * 60 * 60 * 1000)))} days)
+                        Delete (Available in {Math.ceil((90 - ((new Date().getTime() - new Date(track.takenDownAt!).getTime()) / (24 * 60 * 60 * 1000))))} days)
                       </DropdownMenuItem>
                     )}
                   </>
