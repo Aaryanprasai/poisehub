@@ -39,3 +39,5 @@ export const AdminProtectedRoute = ({
 
   return <>{children}</>;
 };
+
+export default AdminProtectedRoute;
