@@ -21,7 +21,7 @@ export function AdminProvider({ children, user, setUser }: AdminProviderProps) {
 
   const adminLogin = async (username: string, password: string): Promise<void> => {
     // In a real app, we would verify credentials against the database
-    if (username === 'beatecho' && password === 'adminpass123') {
+    if (username === 'poise' && password === 'adminpass123') {
       // After successful password check, we require OTP
       setAdminOTPRequired(true);
       setAdminLoginEmail(username);
@@ -45,7 +45,7 @@ export function AdminProvider({ children, user, setUser }: AdminProviderProps) {
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
         phoneNumber: '+1234567890',
         twoFactorEnabled: true,
-        role: adminLoginEmail === 'beatecho' ? 'superadmin' : 'admin',
+        role: adminLoginEmail === 'poise' ? 'superadmin' : 'admin',
         createdAt: new Date().toISOString(),
         verificationStatus: 'verified',
       } as User);

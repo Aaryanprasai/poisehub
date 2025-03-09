@@ -6,7 +6,7 @@ import { useRegistrationContext, RegistrationProvider } from './RegistrationCont
 import { User } from '@/lib/types';
 
 // Re-export the user type for convenience
-export { User } from '@/lib/types';
+export type { User } from '@/lib/types';
 
 // Define the core authentication context
 interface AuthContextType {
