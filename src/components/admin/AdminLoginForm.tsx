@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { LogIn } from 'lucide-react';
+import { User } from '@/lib/types';
 
 // Login Form Schema
 const loginSchema = z.object({
@@ -46,7 +47,7 @@ export function AdminLoginForm() {
     try {
       // Simple credential check - no OTP verification
       if (data.username === 'poise' && data.password === 'adminpass123') {
-        const adminUser = {
+        const adminUser: User = {
           id: 'admin1',
           name: 'Poise Admin',
           email: data.username + '@poisemusic.com',
