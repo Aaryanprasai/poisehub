@@ -6,7 +6,7 @@ import { ProfileForm } from '@/components/settings/ProfileForm';
 import { AccountSettingsForm } from '@/components/settings/AccountSettingsForm';
 import { SecurityForm } from '@/components/settings/SecurityForm';
 import { PrivacyForm } from '@/components/settings/PrivacyForm';
-import { ConnectionsForm } from '@/components/settings/ConnectionsForm';
+import { AccountDeletionForm } from '@/components/settings/AccountDeletionForm';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -27,7 +27,7 @@ const Settings = () => {
             <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
-            <TabsTrigger value="connections">Connections</TabsTrigger>
+            <TabsTrigger value="delete">Delete Account</TabsTrigger>
           </TabsList>
           
           {/* Profile Settings */}
@@ -50,9 +50,9 @@ const Settings = () => {
             <PrivacyForm />
           </TabsContent>
           
-          {/* Connected Accounts */}
-          <TabsContent value="connections">
-            <ConnectionsForm />
+          {/* Account Deletion */}
+          <TabsContent value="delete">
+            <AccountDeletionForm />
           </TabsContent>
         </Tabs>
       </div>

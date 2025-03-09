@@ -83,7 +83,12 @@ const UserProfile = () => {
             <LogOut className="h-4 w-4" />
           </Button>
         </div>
-        <VerificationBadge status={user?.verificationStatus} />
+        <div className="flex flex-wrap gap-1">
+          <VerificationBadge status={user?.verificationStatus} />
+          {user?.deleteStatus === 'pending' && (
+            <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">Deletion Pending</span>
+          )}
+        </div>
       </div>
     </div>
   );

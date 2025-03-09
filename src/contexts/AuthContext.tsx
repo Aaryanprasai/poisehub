@@ -1,7 +1,6 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -15,6 +14,8 @@ interface User {
   businessDocument?: File | null;
   taxDocument?: File | null;
   verificationStatus: 'unverified' | 'pending' | 'verified' | 'rejected';
+  deleteStatus?: 'pending' | 'approved' | null;
+  hasReleases?: boolean;
 }
 
 interface AuthContextType {
@@ -22,7 +23,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, idType: 'personal' | 'business') => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
   toggleTwoFactor?: (enabled: boolean) => void;
@@ -33,6 +34,7 @@ interface AuthContextType {
     businessDocument: string,
     taxDocument: string
   ) => void;
+  requestAccountDeletion: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,11 +54,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       twoFactorEnabled: false,
       role: 'artist',
       createdAt: new Date().toISOString(),
-      verificationStatus: 'unverified'
+      verificationStatus: 'unverified',
+      hasReleases: true
     } as User);
   };
 
-  const register = async (name: string, email: string, password: string): Promise<void> => {
+  const register = async (name: string, email: string, password: string, idType: 'personal' | 'business'): Promise<void> => {
     // Mock registration - in a real app, this would call an API
     setUser({
       id: '1',
@@ -67,7 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       twoFactorEnabled: false,
       role: 'artist',
       createdAt: new Date().toISOString(),
-      verificationStatus: 'unverified'
+      verificationStatus: 'unverified',
+      idType: idType,
+      hasReleases: false
     } as User);
   };
 
@@ -108,6 +113,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const requestAccountDeletion = () => {
+    if (user) {
+      // If user has releases, set delete status to pending for admin approval
+      // Otherwise, we could immediately delete the account (logout in this demo)
+      if (user.hasReleases) {
+        setUser({
+          ...user,
+          deleteStatus: 'pending'
+        });
+      } else {
+        // Immediately delete account (logout in this demo)
+        logout();
+      }
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -121,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         toggleTwoFactor,
         updatePhoneNumber,
         uploadVerificationDocuments,
+        requestAccountDeletion
       }}
     >
       {children}
