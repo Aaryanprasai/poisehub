@@ -14,7 +14,7 @@ interface ProfileProps {
 }
 
 const Profile: React.FC<ProfileProps> = () => {
-  const { user } = useAuth();
+  const { user, uploadVerificationDocuments } = useAuth();
   const [activeTab, setActiveTab] = useState('general');
 
   return (
@@ -40,7 +40,7 @@ const Profile: React.FC<ProfileProps> = () => {
               <CardDescription>Update your personal details</CardDescription>
             </CardHeader>
             <CardContent>
-              {user && <ProfileForm user={user} />}
+              {user && <ProfileForm />}
             </CardContent>
           </Card>
         </TabsContent>
@@ -52,7 +52,7 @@ const Profile: React.FC<ProfileProps> = () => {
               <CardDescription>Manage your account preferences</CardDescription>
             </CardHeader>
             <CardContent>
-              {user && <AccountSettingsForm user={user} />}
+              {user && <AccountSettingsForm />}
             </CardContent>
           </Card>
         </TabsContent>
@@ -64,7 +64,7 @@ const Profile: React.FC<ProfileProps> = () => {
               <CardDescription>Verify your identity to unlock all features</CardDescription>
             </CardHeader>
             <CardContent>
-              {user && <VerificationForm user={user} />}
+              {user && <VerificationForm user={user} uploadVerificationDocuments={uploadVerificationDocuments} />}
             </CardContent>
           </Card>
         </TabsContent>

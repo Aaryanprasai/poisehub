@@ -63,7 +63,7 @@ export const verificationSchema = z.object({
 
 export type VerificationValues = z.infer<typeof verificationSchema>;
 
-interface VerificationFormProps {
+export interface VerificationFormProps {
   user: User | null;
   uploadVerificationDocuments: (
     idType: 'personal' | 'business',

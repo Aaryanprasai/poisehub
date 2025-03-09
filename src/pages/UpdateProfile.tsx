@@ -17,7 +17,7 @@ const UpdateProfile = () => {
           <CardDescription>Update your personal details</CardDescription>
         </CardHeader>
         <CardContent>
-          {user && <ProfileForm user={user} />}
+          {user && <ProfileForm />}
         </CardContent>
       </Card>
     </div>

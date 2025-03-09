@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, Dispatch, SetStateAction } from 'react';
 import { User } from '@/lib/types';
 
@@ -5,7 +6,7 @@ interface UserContextType {
   updateUser: (userData: Partial<User>) => void;
   toggleTwoFactor?: (enabled: boolean) => void;
   updatePhoneNumber?: (phoneNumber: string) => void;
-  uploadVerificationDocuments?: (
+  uploadVerificationDocuments: (
     idType: 'personal' | 'business',
     idDocument: string,
     businessDocument: string,
