@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Upload, RefreshCw } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormValues } from './types';
-import { useAdminContext } from '@/contexts/AuthContext';
+import { useAdminContext } from '@/contexts/AdminContext';
 import { toast } from 'sonner';
 
 interface RightsFormProps {
