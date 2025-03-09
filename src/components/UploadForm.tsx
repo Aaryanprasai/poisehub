@@ -47,6 +47,12 @@ export function UploadForm({ open, onOpenChange }: UploadFormProps) {
       isrcCode: '',
       hasPublishingRights: false,
       publisher: '',
+      publisherInfo: {
+        pro: '',
+        ipi: '',
+        publishingShare: '',
+        notes: ''
+      }
     },
   });
 

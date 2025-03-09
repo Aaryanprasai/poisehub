@@ -3,6 +3,7 @@ import { FormField, FormItem, FormLabel, FormDescription, FormControl, FormMessa
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { Upload } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormValues } from './types';
@@ -78,19 +79,85 @@ export function RightsForm({ form, isSubmitting, onBack }: RightsFormProps) {
       />
       
       {hasPublishingRights && (
-        <FormField
-          control={form.control}
-          name="publisher"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Publisher Information</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter publisher name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-4 border rounded-md p-4">
+          <h3 className="font-medium">Publishing Information</h3>
+          
+          <FormField
+            control={form.control}
+            name="publisher"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Publisher Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter publisher name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="publisherInfo.pro"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>PRO (Performance Rights Organization)</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., ASCAP, BMI, SESAC" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="publisherInfo.ipi"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>IPI/CAE Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter IPI or CAE number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="publisherInfo.publishingShare"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Publishing Share (%)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="e.g., 100" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <FormField
+            control={form.control}
+            name="publisherInfo.notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Additional Notes</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Any additional information about publishing" 
+                    className="resize-none" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       )}
       
       <div className="flex justify-between">
