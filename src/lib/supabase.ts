@@ -4,8 +4,8 @@ import type { Database } from '../types/supabase';
 
 // Note: These are placeholder values for development
 // In a real application, use the Supabase integration with Lovable
-const supabaseUrl = "https://example.supabase.co";
-const supabaseAnonKey = "example-anon-key";
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "https://example.supabase.co";
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "example-anon-key";
 
 // This is a mock client that doesn't actually connect to Supabase
 // When you're ready to use real data, use the Supabase integration in Lovable

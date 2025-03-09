@@ -28,7 +28,7 @@ export function BulkDataUpload() {
       fileName = 'streams_template.csv';
     } else {
       // Define royalties template CSV headers and sample data
-      csvContent += 'artist_id,track_id,service_name,amount,period,payment_date,status\n';
+      csvContent = 'artist_id,track_id,service_name,amount,period,payment_date,status\n';
       csvContent += 'artist_123,track_123,Spotify,235.50,October 2023,2023-10-15,pending\n';
       csvContent += 'artist_456,track_456,Apple Music,189.75,October 2023,2023-10-20,paid\n';
       fileName = 'royalties_template.csv';
