@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export interface User {
@@ -26,7 +25,6 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, idType: 'personal' | 'business') => Promise<void>;
   adminLogin: (username: string, password: string) => Promise<void>;
-  verifyAdminOTP: (otp: string) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
   toggleTwoFactor?: (enabled: boolean) => void;
@@ -51,8 +49,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [adminOTPRequired, setAdminOTPRequired] = useState<boolean>(false);
-  const [adminLoginEmail, setAdminLoginEmail] = useState<string>('');
   const [registrationConfig, setRegistrationConfig] = useState({
     publicRegistrationEnabled: true,
     inviteOnlyMode: false
@@ -76,37 +72,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const adminLogin = async (username: string, password: string): Promise<void> => {
-    // In a real app, we would verify credentials against the database
+    // Simplified admin login without 2FA
     if (username === 'beatecho' && password === 'adminpass123') {
-      // After successful password check, we require OTP
-      setAdminOTPRequired(true);
-      setAdminLoginEmail(username);
-      
-      // In a real app, send OTP via email or WhatsApp here
-      console.log('Admin OTP sent to registered email/WhatsApp');
-    } else {
-      throw new Error('Invalid admin credentials');
-    }
-  };
-
-  const verifyAdminOTP = async (otp: string): Promise<void> => {
-    // In a real app, we would verify the OTP
-    // For demo, we'll accept any 6-digit OTP
-    if (otp.length === 6 && /^\d+$/.test(otp)) {
-      setAdminOTPRequired(false);
+      // Super admin login
       setUser({
         id: 'admin1',
         name: 'Beat Echo Admin',
-        email: adminLoginEmail + '@beatecho.com',
+        email: username + '@beatecho.com',
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
         phoneNumber: '+1234567890',
-        twoFactorEnabled: true,
-        role: adminLoginEmail === 'beatecho' ? 'superadmin' : 'admin',
+        twoFactorEnabled: false,
+        role: 'superadmin',
+        createdAt: new Date().toISOString(),
+        verificationStatus: 'verified',
+      } as User);
+    } else if (username === 'admin' && password === 'admin123') {
+      // Regular admin login
+      setUser({
+        id: 'admin2',
+        name: 'Regular Admin',
+        email: username + '@beatecho.com',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=regularadmin',
+        phoneNumber: '+1234567890',
+        twoFactorEnabled: false,
+        role: 'admin',
         createdAt: new Date().toISOString(),
         verificationStatus: 'verified',
       } as User);
     } else {
-      throw new Error('Invalid OTP');
+      throw new Error('Invalid admin credentials');
     }
   };
 
@@ -139,8 +133,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    setAdminOTPRequired(false);
-    setAdminLoginEmail('');
   };
 
   const updateUser = (userData: Partial<User>) => {
@@ -216,7 +208,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         adminLogin,
-        verifyAdminOTP,
         logout,
         updateUser,
         toggleTwoFactor,

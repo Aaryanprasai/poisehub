@@ -21,7 +21,7 @@ export default function AdminLogin() {
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Admin Access</CardTitle>
             <CardDescription className="text-center">
-              Sign in to access the admin dashboard
+              Sign in with your admin credentials
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -29,7 +29,7 @@ export default function AdminLogin() {
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
             <div className="text-sm text-center text-muted-foreground mt-2">
-              Secure access for authorized personnel only
+              For testing: Username: beatecho, Password: adminpass123
             </div>
           </CardFooter>
         </Card>
