@@ -52,14 +52,11 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     setIsLoggingIn(true);
     
     try {
-      const success = await login(values.emailOrUsername, values.password);
-      
-      if (success) {
-        toast.success('Login successful!');
-        navigate(from);
-        if (onSuccess) {
-          onSuccess(values.emailOrUsername);
-        }
+      await login(values.emailOrUsername, values.password);
+      toast.success('Login successful!');
+      navigate(from);
+      if (onSuccess) {
+        onSuccess(values.emailOrUsername);
       }
     } catch (error) {
       toast.error('Login failed. Please check your credentials.');
@@ -74,14 +71,11 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     // This function will be connected to real Google OAuth later
     setTimeout(async () => {
       try {
-        const success = await login('google-user@example.com', 'password');
-        
-        if (success) {
-          toast.success('Google login successful!');
-          navigate(from);
-          if (onSuccess) {
-            onSuccess('google-user@example.com');
-          }
+        await login('google-user@example.com', 'password');
+        toast.success('Google login successful!');
+        navigate(from);
+        if (onSuccess) {
+          onSuccess('google-user@example.com');
         }
       } catch (error) {
         toast.error('Google login failed. Please try again.');
