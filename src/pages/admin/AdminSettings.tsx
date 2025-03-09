@@ -1,41 +1,15 @@
 
 import React from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RegistrationSettings } from '@/components/admin/RegistrationSettings';
-import { CodeGenerationSettings } from '@/components/admin/CodeGenerationSettings';
-import { PlatformManager } from '@/components/admin/PlatformManager';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 const AdminSettings = () => {
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">System Settings</h2>
-          <p className="text-muted-foreground">
-            Configure system-wide settings and preferences
-          </p>
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Admin Settings</h1>
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-gray-500">Admin configuration settings will appear here.</p>
         </div>
-
-        <Tabs defaultValue="registration">
-          <TabsList className="grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="registration">Registration</TabsTrigger>
-            <TabsTrigger value="platforms">Platforms</TabsTrigger>
-            <TabsTrigger value="codes">ISRC/UPC</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="registration" className="space-y-4 mt-4">
-            <RegistrationSettings />
-          </TabsContent>
-          
-          <TabsContent value="platforms" className="space-y-4 mt-4">
-            <PlatformManager />
-          </TabsContent>
-          
-          <TabsContent value="codes" className="space-y-4 mt-4">
-            <CodeGenerationSettings />
-          </TabsContent>
-        </Tabs>
       </div>
     </AdminLayout>
   );
