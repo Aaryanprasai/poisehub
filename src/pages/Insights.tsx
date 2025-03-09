@@ -171,15 +171,15 @@ const Insights = () => {
             </TabsList>
             
             <TabsContent value="overview">
-              <OverviewTabContent data={insightsData} timeRange={timeRange} />
+              <OverviewTabContent />
             </TabsContent>
             
             <TabsContent value="platforms">
-              <PlatformsTabContent data={insightsData} timeRange={timeRange} />
+              <PlatformsTabContent />
             </TabsContent>
             
             <TabsContent value="demographics">
-              <DemographicsTabContent data={insightsData} timeRange={timeRange} />
+              <DemographicsTabContent />
             </TabsContent>
           </Tabs>
         )}

@@ -16,7 +16,12 @@ const genderData = [
   { name: 'Non-binary', value: 3 },
 ];
 
-const DemographicsTabContent = () => {
+interface DemographicsTabContentProps {
+  data?: any;
+  timeRange?: string;
+}
+
+const DemographicsTabContent = ({ data, timeRange }: DemographicsTabContentProps = {}) => {
   return (
     <div className="grid gap-6 md:grid-cols-2 mt-6">
       <Card>

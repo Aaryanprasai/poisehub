@@ -11,7 +11,12 @@ const platformData = [
   { name: 'Other', value: 5 },
 ];
 
-const PlatformsTabContent = () => {
+interface PlatformsTabContentProps {
+  data?: any;
+  timeRange?: string;
+}
+
+const PlatformsTabContent = ({ data, timeRange }: PlatformsTabContentProps = {}) => {
   return (
     <div className="grid gap-6 mt-6">
       <Card>

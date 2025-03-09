@@ -13,7 +13,12 @@ const platformData = [
   { name: 'Other', value: 5 },
 ];
 
-const OverviewTabContent = () => {
+interface OverviewTabContentProps {
+  data?: any;
+  timeRange?: string;
+}
+
+const OverviewTabContent = ({ data, timeRange }: OverviewTabContentProps = {}) => {
   return (
     <div className="grid gap-6 md:grid-cols-2 mt-6">
       <Card>
