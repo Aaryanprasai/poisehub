@@ -4,12 +4,12 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Save, Shield } from "lucide-react";
+import { Save, Shield, LockOff } from "lucide-react";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui-extensions/Button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/contexts/AuthContext";
 
 const formSchema = z.object({
   requireStrongPasswords: z.boolean(),
@@ -17,12 +17,14 @@ const formSchema = z.object({
   enforceIPRestriction: z.boolean(),
   allowedIPs: z.string().optional(),
   loginAttempts: z.coerce.number().int().min(1).max(10),
+  publicLoginEnabled: z.boolean(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 export function SecuritySettings() {
   const [isSaving, setIsSaving] = useState(false);
+  const { registrationConfig, updateRegistrationConfig } = useAuth();
   
   // In a real app, these would come from an API or context
   const defaultValues = {
@@ -31,6 +33,7 @@ export function SecuritySettings() {
     enforceIPRestriction: false,
     allowedIPs: "",
     loginAttempts: 5,
+    publicLoginEnabled: registrationConfig.publicLoginEnabled,
   };
   
   const form = useForm<FormValues>({
@@ -43,10 +46,15 @@ export function SecuritySettings() {
   const onSubmit = async (values: FormValues) => {
     setIsSaving(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
     try {
+      // Update the registration config for public login
+      updateRegistrationConfig({
+        publicLoginEnabled: values.publicLoginEnabled
+      });
+      
+      // Simulate API call for other settings
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // In a real app, this would be an API call
       console.log("Security settings updated:", values);
       toast.success("Security settings updated successfully");
@@ -61,6 +69,27 @@ export function SecuritySettings() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="publicLoginEnabled"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Allow Public Login</FormLabel>
+                  <FormDescription>
+                    Enable or disable direct user login. When disabled, only admin access is allowed.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          
           <FormField
             control={form.control}
             name="requireStrongPasswords"
@@ -175,6 +204,21 @@ export function SecuritySettings() {
         >
           Update Security Settings
         </Button>
+        
+        {!form.watch("publicLoginEnabled") && (
+          <Button 
+            type="button" 
+            variant="outline"
+            className="ml-2"
+            onClick={() => {
+              form.setValue("publicLoginEnabled", true);
+              form.handleSubmit(onSubmit)();
+            }}
+            leftIcon={<LockOff className="h-4 w-4" />}
+          >
+            Re-enable Public Login
+          </Button>
+        )}
       </form>
     </Form>
   );

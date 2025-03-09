@@ -16,8 +16,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { Separator } from '@/components/ui/separator';
-import { Mail } from 'lucide-react';
+import { Mail, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const loginSchema = z.object({
   emailOrUsername: z.string().min(1, 'Email or username is required'),
@@ -35,7 +36,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const [isGoogleLoggingIn, setIsGoogleLoggingIn] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, registrationConfig } = useAuth();
   
   // Get the 'from' path from location state or default to dashboard
   const from = location.state?.from || '/dashboard';
@@ -59,13 +60,22 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         onSuccess(values.emailOrUsername);
       }
     } catch (error) {
-      toast.error('Login failed. Please check your credentials.');
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Login failed. Please check your credentials.');
+      }
     } finally {
       setIsLoggingIn(false);
     }
   };
 
   const handleGoogleLogin = () => {
+    if (!registrationConfig.publicLoginEnabled) {
+      toast.error('Public login is currently disabled. Please contact an administrator for access.');
+      return;
+    }
+    
     setIsGoogleLoggingIn(true);
     
     // This function will be connected to real Google OAuth later
@@ -78,12 +88,38 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           onSuccess('google-user@example.com');
         }
       } catch (error) {
-        toast.error('Google login failed. Please try again.');
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('Google login failed. Please try again.');
+        }
       } finally {
         setIsGoogleLoggingIn(false);
       }
     }, 1500);
   };
+
+  // If public login is disabled, show a message instead of the login form
+  if (!registrationConfig.publicLoginEnabled) {
+    return (
+      <div className="space-y-6">
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Direct login is currently disabled. Please contact an administrator for access or visit the admin portal.
+          </AlertDescription>
+        </Alert>
+        <Button 
+          type="button" 
+          variant="outline" 
+          className="w-full"
+          onClick={() => navigate('/admin')}
+        >
+          Go to Admin Portal
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

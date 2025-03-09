@@ -41,8 +41,13 @@ interface AuthContextType {
   registrationConfig: {
     publicRegistrationEnabled: boolean;
     inviteOnlyMode: boolean;
+    publicLoginEnabled: boolean;
   };
-  updateRegistrationConfig: (config: Partial<{ publicRegistrationEnabled: boolean; inviteOnlyMode: boolean }>) => void;
+  updateRegistrationConfig: (config: Partial<{ 
+    publicRegistrationEnabled: boolean; 
+    inviteOnlyMode: boolean;
+    publicLoginEnabled: boolean;
+  }>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -51,10 +56,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [registrationConfig, setRegistrationConfig] = useState({
     publicRegistrationEnabled: true,
-    inviteOnlyMode: false
+    inviteOnlyMode: false,
+    publicLoginEnabled: true
   });
 
   const login = async (email: string, password: string): Promise<void> => {
+    // Check if public login is enabled
+    if (!registrationConfig.publicLoginEnabled) {
+      throw new Error('Public login is currently disabled. Please contact an administrator for access.');
+    }
+    
     // Mock login - in a real app, this would call an API
     // For demo purposes, we're setting a fake user
     setUser({
@@ -192,7 +203,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user?.role === 'superadmin';
   };
   
-  const updateRegistrationConfig = (config: Partial<{ publicRegistrationEnabled: boolean; inviteOnlyMode: boolean }>) => {
+  const updateRegistrationConfig = (config: Partial<{ 
+    publicRegistrationEnabled: boolean; 
+    inviteOnlyMode: boolean;
+    publicLoginEnabled: boolean;
+  }>) => {
     setRegistrationConfig({
       ...registrationConfig,
       ...config
