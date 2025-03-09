@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Download, Filter, ArrowUpDown } from 'lucide-react';
+import { BulkDataUpload } from '@/components/admin/BulkDataUpload';
 
 // Mock data for royalty payments
 const mockRoyaltyData = [
@@ -76,6 +77,7 @@ const getStatusColor = (status: string) => {
 export default function AdminRoyalties() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [activeTab, setActiveTab] = useState('payments');
   
   // Filter the data based on search term and status
   const filteredData = mockRoyaltyData.filter(royalty => {
@@ -94,9 +96,10 @@ export default function AdminRoyalties() {
       <div className="container mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">Royalty Management</h1>
         
-        <Tabs defaultValue="payments" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="bulk-upload">Bulk Upload</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="settings">Payout Settings</TabsTrigger>
           </TabsList>
@@ -202,6 +205,10 @@ export default function AdminRoyalties() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="bulk-upload">
+            <BulkDataUpload />
           </TabsContent>
           
           <TabsContent value="reports">

@@ -152,6 +152,67 @@ export interface Database {
           public_login_enabled?: boolean
         }
       }
+      track_streams: {
+        Row: {
+          id: string
+          track_id: string
+          service_name: string
+          stream_count: number
+          stream_date: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          track_id: string
+          service_name: string
+          stream_count: number
+          stream_date: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          track_id?: string
+          service_name?: string
+          stream_count?: number
+          stream_date?: string
+          created_at?: string
+        }
+      }
+      royalty_payments: {
+        Row: {
+          id: string
+          artist_id: string
+          track_id: string
+          service_name: string
+          amount: number
+          period: string
+          payment_date: string
+          status: 'pending' | 'processing' | 'paid'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          artist_id: string
+          track_id: string
+          service_name: string
+          amount: number
+          period: string
+          payment_date: string
+          status?: 'pending' | 'processing' | 'paid'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          artist_id?: string
+          track_id?: string
+          service_name?: string
+          amount?: number
+          period?: string
+          payment_date?: string
+          status?: 'pending' | 'processing' | 'paid'
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
