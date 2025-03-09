@@ -20,6 +20,9 @@ export interface Track {
   duration: number;
   userId: string;
   distributionServices: DistributionService[];
+  takenDownAt?: Date;
+  modificationRequested?: boolean;
+  modificationMessage?: string;
 }
 
 export interface DistributionService {

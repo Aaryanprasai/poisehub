@@ -146,6 +146,82 @@ export const tracks = [
         logo: "/placeholder.svg"
       }
     ]
+  },
+  {
+    id: "5",
+    title: "Neon Dreams",
+    artist: "John Doe",
+    artwork: "/placeholder.svg",
+    genre: "Synthwave",
+    status: "approved" as const,
+    submittedAt: new Date("2023-01-15"),
+    releaseDate: new Date("2023-02-01"),
+    duration: 227,
+    userId: "1",
+    takenDownAt: new Date(Date.now() - (95 * 24 * 60 * 60 * 1000)), // Taken down 95 days ago (more than 3 months)
+    distributionServices: [
+      {
+        id: "1",
+        name: "Spotify",
+        logo: "/placeholder.svg"
+      },
+      {
+        id: "2",
+        name: "Apple Music",
+        logo: "/placeholder.svg"
+      }
+    ]
+  },
+  {
+    id: "6",
+    title: "Endless Road",
+    artist: "John Doe",
+    artwork: "/placeholder.svg",
+    genre: "Rock",
+    status: "approved" as const,
+    submittedAt: new Date("2023-03-20"),
+    releaseDate: new Date("2023-04-05"),
+    duration: 240,
+    userId: "1",
+    takenDownAt: new Date(Date.now() - (30 * 24 * 60 * 60 * 1000)), // Taken down 30 days ago (less than 3 months)
+    distributionServices: [
+      {
+        id: "2",
+        name: "Apple Music",
+        logo: "/placeholder.svg"
+      },
+      {
+        id: "3",
+        name: "Amazon Music",
+        logo: "/placeholder.svg"
+      }
+    ]
+  },
+  {
+    id: "7",
+    title: "Crystal Clear",
+    artist: "John Doe",
+    artwork: "/placeholder.svg",
+    genre: "Pop",
+    status: "approved" as const,
+    submittedAt: new Date("2023-04-10"),
+    releaseDate: new Date("2023-05-01"),
+    duration: 198,
+    userId: "1",
+    modificationRequested: true,
+    modificationMessage: "Please update the album artwork to match our content guidelines. The current image is too blurry.",
+    distributionServices: [
+      {
+        id: "1",
+        name: "Spotify",
+        logo: "/placeholder.svg"
+      },
+      {
+        id: "4",
+        name: "YouTube Music",
+        logo: "/placeholder.svg"
+      }
+    ]
   }
 ];
 
