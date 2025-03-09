@@ -5,4 +5,4 @@ import { useAuth } from '../hooks/useAuth';
 import { User } from '../types/auth';
 
 export type { User };
-export { AuthProvider, useAuth };
+export { AuthContext, AuthProvider, useAuth };
