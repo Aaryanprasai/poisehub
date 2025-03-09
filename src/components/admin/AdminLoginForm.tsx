@@ -18,7 +18,7 @@ const adminLoginSchema = z.object({
 });
 
 const otpSchema = z.object({
-  otp: z.string().min(6, 'OTP must be 6 digits').max(6, 'OTP must be 6 digits'),
+  otp: z.string().min(6, 'OTP must be 6 digits').max(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only numbers'),
 });
 
 export function AdminLoginForm() {
@@ -48,6 +48,7 @@ export function AdminLoginForm() {
     try {
       await adminLogin(values.username, values.password);
       setShowOTPInput(true);
+      otpForm.reset(); // Reset OTP form when showing it
       toast.success('OTP sent to your registered email/WhatsApp');
     } catch (error) {
       toast.error('Login failed. Please check your credentials.');
@@ -135,16 +136,19 @@ export function AdminLoginForm() {
                 <FormItem>
                   <FormLabel>Verification Code (OTP)</FormLabel>
                   <FormControl>
-                    <InputOTP maxLength={6} {...field}>
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
+                    <InputOTP 
+                      maxLength={6}
+                      pattern="\d*"
+                      value={field.value}
+                      onChange={field.onChange}
+                      render={({ slots }) => (
+                        <InputOTPGroup>
+                          {slots.map((slot, index) => (
+                            <InputOTPSlot key={index} index={index} />
+                          ))}
+                        </InputOTPGroup>
+                      )}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
