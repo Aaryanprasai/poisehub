@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Upload, Download, Check, AlertCircle } from 'lucide-react';
+import { Upload, Download, Check, AlertCircle, Shield } from 'lucide-react';
 import { Button } from '@/components/ui-extensions/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,12 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function BulkDataUpload() {
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<boolean | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
+  const { isSuperAdmin } = useAuth();
 
   // Function to download template CSV files
   const downloadTemplate = (type: 'streams' | 'royalties') => {
@@ -83,10 +86,8 @@ export function BulkDataUpload() {
           throw new Error('No data found in the file or invalid format');
         }
 
-        // Example implementation - in a real app, you'd validate and transform the data as needed
         if (type === 'streams') {
           // Insert into streams table
-          // This is a placeholder. In a real implementation, you'd use your actual table
           const { error } = await supabase.from('track_streams').insert(
             parsedData.map(row => ({
               track_id: row.track_id,
@@ -99,7 +100,6 @@ export function BulkDataUpload() {
           if (error) throw error;
         } else {
           // Insert into royalties table
-          // This is a placeholder. In a real implementation, you'd use your actual table
           const { error } = await supabase.from('royalty_payments').insert(
             parsedData.map(row => ({
               artist_id: row.artist_id,
@@ -152,6 +152,28 @@ export function BulkDataUpload() {
 
     reader.readAsText(file);
   };
+
+  // Check if user has super admin privileges
+  if (!isSuperAdmin()) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Bulk Data Upload</CardTitle>
+          <CardDescription>
+            This feature is only available to super administrators.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert>
+            <Shield className="h-4 w-4" />
+            <AlertDescription>
+              You need super administrator privileges to access the bulk upload functionality.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

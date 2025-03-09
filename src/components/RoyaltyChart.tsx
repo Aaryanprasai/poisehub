@@ -2,13 +2,15 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui-extensions/Card';
 import { RoyaltyData } from '@/lib/types';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps, Legend } from 'recharts';
 import { cn } from '@/lib/utils';
 
 interface RoyaltyChartProps {
   data: RoyaltyData[];
   title?: string;
   className?: string;
+  height?: number;
+  showLegend?: boolean;
 }
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
@@ -20,7 +22,7 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 rounded-md shadow-md border">
+      <div className="bg-white p-3 rounded-md shadow-md border dark:bg-gray-800 dark:border-gray-700">
         <p className="font-medium">{label}</p>
         {payload.map((entry: any, index: number) => (
           <div 
@@ -39,7 +41,13 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-export function RoyaltyChart({ data, title = "Royalties", className }: RoyaltyChartProps) {
+export function RoyaltyChart({ 
+  data, 
+  title = "Royalties", 
+  className,
+  height = 300,
+  showLegend = true
+}: RoyaltyChartProps) {
   const chartData = useMemo(() => {
     // Group by month and service
     const groupedData = data.reduce((acc, item) => {
@@ -72,7 +80,7 @@ export function RoyaltyChart({ data, title = "Royalties", className }: RoyaltyCh
   }, [data]);
 
   // Colors for each service
-  const colors = ["#38bdf8", "#fb7185", "#facc15", "#4ade80", "#a78bfa"];
+  const colors = ["#38bdf8", "#fb7185", "#facc15", "#4ade80", "#a78bfa", "#f472b6", "#fb923c"];
 
   return (
     <Card className={cn("w-full", className)}>
@@ -80,7 +88,7 @@ export function RoyaltyChart({ data, title = "Royalties", className }: RoyaltyCh
         <CardTitle className="text-xl">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-1">
-        <div className="h-[300px] w-full">
+        <div className={`h-[${height}px] w-full`} style={{ height: `${height}px` }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
@@ -104,6 +112,7 @@ export function RoyaltyChart({ data, title = "Royalties", className }: RoyaltyCh
                 axisLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
               />
               <Tooltip content={<CustomTooltip />} />
+              {showLegend && <Legend />}
               {services.map((service, index) => (
                 <Bar
                   key={service}
