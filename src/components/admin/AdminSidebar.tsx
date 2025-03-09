@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui-extensions/Button";
@@ -13,7 +12,8 @@ import {
   Settings,
   UserPlus,
   X,
-  PanelLeft
+  PanelLeft,
+  Package
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -32,6 +32,7 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }: AdminSidebarProps) => {
     { icon: Ticket, label: "Support Tickets", href: "/admin/tickets" },
     { icon: DollarSign, label: "Royalties", href: "/admin/royalties" },
     { icon: ShieldAlert, label: "Deletion Requests", href: "/admin/deletion-requests" },
+    { icon: Package, label: "Platforms & Codes", href: "/admin/platforms-settings" },
     { icon: Settings, label: "Settings", href: "/admin/settings" },
   ];
 

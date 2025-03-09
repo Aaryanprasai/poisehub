@@ -1,11 +1,31 @@
 
 import React, { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
-import { User } from '@/lib/types';
+import { User, DistributionService } from '@/lib/types';
+import { distributionPlatforms as initialPlatforms } from '@/components/upload/constants';
+
+interface CodeGenerationSettings {
+  isrc: {
+    autoGenerate: boolean;
+    countryCode: string;
+    registrantCode: string;
+  };
+  upc: {
+    autoGenerate: boolean;
+    prefix: string;
+  };
+}
 
 interface AdminContextType {
   adminLogin: (username: string, password: string) => Promise<void>;
   verifyAdminOTP: (otp: string) => Promise<void>;
-  adminOTPRequired: boolean; // Export this state
+  adminOTPRequired: boolean;
+  distributionPlatforms: DistributionService[];
+  addPlatform: (platform: DistributionService) => void;
+  removePlatform: (platformId: string) => void;
+  codeGenerationSettings: CodeGenerationSettings;
+  updateCodeGenerationSettings: (settings: CodeGenerationSettings) => void;
+  generateISRC: () => string;
+  generateUPC: () => string;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -19,6 +39,18 @@ interface AdminProviderProps {
 export function AdminProvider({ children, user, setUser }: AdminProviderProps) {
   const [adminOTPRequired, setAdminOTPRequired] = useState<boolean>(false);
   const [adminLoginEmail, setAdminLoginEmail] = useState<string>('');
+  const [distributionPlatforms, setDistributionPlatforms] = useState<DistributionService[]>(initialPlatforms);
+  const [codeGenerationSettings, setCodeGenerationSettings] = useState<CodeGenerationSettings>({
+    isrc: {
+      autoGenerate: true,
+      countryCode: 'US',
+      registrantCode: 'POI'
+    },
+    upc: {
+      autoGenerate: true,
+      prefix: '12345'
+    }
+  });
 
   const adminLogin = async (username: string, password: string): Promise<void> => {
     try {
@@ -65,12 +97,67 @@ export function AdminProvider({ children, user, setUser }: AdminProviderProps) {
     }
   };
 
+  // ISRC code generation function
+  const generateISRC = (): string => {
+    if (!codeGenerationSettings.isrc.autoGenerate) {
+      return '';
+    }
+    
+    const prefix = codeGenerationSettings.isrc.countryCode + codeGenerationSettings.isrc.registrantCode;
+    const year = new Date().getFullYear().toString().substring(2); // Get last 2 digits of year
+    const random = Math.floor(Math.random() * 10000).toString().padStart(5, '0');
+    
+    return `${prefix}${year}${random}`;
+  };
+
+  // UPC code generation function
+  const generateUPC = (): string => {
+    if (!codeGenerationSettings.upc.autoGenerate) {
+      return '';
+    }
+    
+    const prefix = codeGenerationSettings.upc.prefix;
+    const random = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+    
+    // Simple check digit calculation
+    const digits = (prefix + random).split('').map(Number);
+    let sum = 0;
+    for (let i = 0; i < digits.length; i++) {
+      sum += i % 2 === 0 ? digits[i] * 3 : digits[i];
+    }
+    const checkDigit = (10 - (sum % 10)) % 10;
+    
+    return `${prefix}${random}${checkDigit}`;
+  };
+
+  // Add new platform
+  const addPlatform = (platform: DistributionService) => {
+    setDistributionPlatforms([...distributionPlatforms, platform]);
+  };
+
+  // Remove platform
+  const removePlatform = (platformId: string) => {
+    setDistributionPlatforms(distributionPlatforms.filter(p => p.id !== platformId));
+  };
+
+  // Update code generation settings
+  const updateCodeGenerationSettings = (settings: CodeGenerationSettings) => {
+    setCodeGenerationSettings(settings);
+  };
+
   return (
     <AdminContext.Provider
       value={{
         adminLogin,
         verifyAdminOTP,
-        adminOTPRequired, // Export this state
+        adminOTPRequired,
+        distributionPlatforms,
+        addPlatform,
+        removePlatform,
+        codeGenerationSettings,
+        updateCodeGenerationSettings,
+        generateISRC,
+        generateUPC
       }}
     >
       {children}

@@ -1,113 +1,95 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AdminProvider } from './contexts/AdminContext';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import UpdateProfile from './pages/UpdateProfile';
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import Upload from './pages/Upload';
+import Support from './pages/Support';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminTracks from './pages/admin/AdminTracks';
+import AdminCreate from './pages/admin/AdminCreate';
+import AdminPlatformsSettings from './pages/admin/AdminPlatformsSettings';
+import AdminTickets from './pages/admin/AdminTickets';
+import AdminRoyalties from './pages/admin/AdminRoyalties';
+import AdminDeletionRequests from './pages/admin/AdminDeletionRequests';
+import AdminSettings from './pages/admin/AdminSettings';
+import PrivateRoute from './components/PrivateRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
+import VerifyEmail from './pages/VerifyEmail';
+import ResetPassword from './pages/ResetPassword';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import Tracks from "./pages/Tracks";
-import Upload from "./pages/Upload";
-import Insights from "./pages/Insights";
-import Support from "./pages/Support";
-import Settings from "./pages/Settings";
-import Payments from "./pages/Payments"; 
-import NotFound from "./pages/NotFound";
-import VerificationPage from "./pages/VerificationPage";
+function App() {
+  const [user, setUser] = useState(null);
+  const { currentUser } = useAuth();
 
-// Admin pages
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminTracks from "./pages/admin/AdminTracks";
-import AdminCreate from "./pages/admin/AdminCreate";
+  useEffect(() => {
+    // Simulate fetching user data or setting it after login
+    if (currentUser) {
+      // Replace with actual user data fetching logic
+      setUser({
+        id: currentUser.uid,
+        name: currentUser.displayName || 'Test User',
+        email: currentUser.email || 'test@example.com',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=test',
+        phoneNumber: '+1234567890',
+        twoFactorEnabled: false,
+        role: 'artist',
+        createdAt: new Date().toISOString(),
+        verificationStatus: 'verified',
+      });
+    } else {
+      setUser(null);
+    }
+  }, [currentUser]);
 
-const queryClient = new QueryClient();
+  return (
+    <Router>
+      <AuthProvider>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            
-            {/* Protected Routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/tracks" element={
-              <ProtectedRoute>
-                <Tracks />
-              </ProtectedRoute>
-            } />
-            <Route path="/upload" element={
-              <ProtectedRoute>
-                <Upload />
-              </ProtectedRoute>
-            } />
-            <Route path="/insights" element={
-              <ProtectedRoute>
-                <Insights />
-              </ProtectedRoute>
-            } />
-            <Route path="/support" element={
-              <ProtectedRoute>
-                <Support />
-              </ProtectedRoute>
-            } />
-            <Route path="/settings" element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            } />
-            <Route path="/payments" element={
-              <ProtectedRoute>
-                <Payments />
-              </ProtectedRoute>
-            } />
-            <Route path="/verification" element={
-              <ProtectedRoute>
-                <VerificationPage />
-              </ProtectedRoute>
-            } />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/users" element={
-              <ProtectedRoute>
-                <AdminUsers />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/tracks" element={
-              <ProtectedRoute>
-                <AdminTracks />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/create-admin" element={
-              <ProtectedRoute>
-                <AdminCreate />
-              </ProtectedRoute>
-            } />
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+          {/* User Routes */}
+          <Route path="/dashboard" element={<PrivateRoute><Dashboard user={user} /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile user={user} /></PrivateRoute>} />
+          <Route path="/update-profile" element={<PrivateRoute><UpdateProfile /></PrivateRoute>} />
+          <Route path="/upload" element={<PrivateRoute><Upload /></PrivateRoute>} />
+          <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLogin user={user} setUser={setUser} />} />
+          <Route path="/admin/*" element={
+            <AdminProtectedRoute user={user}>
+              <AdminProvider user={user} setUser={setUser}>
+                <Routes>
+                  <Route path="/dashboard" element={<AdminDashboard user={user} />} />
+                  <Route path="/users" element={<AdminUsers />} />
+                  <Route path="/tracks" element={<AdminTracks />} />
+                  <Route path="/create-admin" element={<AdminCreate />} />
+                  <Route path="/platforms-settings" element={<AdminPlatformsSettings />} />
+                  <Route path="/tickets" element={<AdminTickets />} />
+                  <Route path="/royalties" element={<AdminRoyalties />} />
+                  <Route path="/deletion-requests" element={<AdminDeletionRequests />} />
+                  <Route path="/settings" element={<AdminSettings />} />
+                </Routes>
+              </AdminProvider>
+            </AdminProtectedRoute>
+          } />
+        </Routes>
+      </AuthProvider>
+    </Router>
+  );
+}
 
 export default App;

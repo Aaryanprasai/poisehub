@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,6 +19,7 @@ import { FileUploadForm } from './upload/FileUploadForm';
 import { DistributionForm } from './upload/DistributionForm';
 import { RightsForm } from './upload/RightsForm';
 import { formSchema, FormValues } from './upload/types';
+import { useAdminContext } from '@/contexts/AdminContext';
 
 interface UploadFormProps {
   open: boolean;
@@ -27,6 +27,7 @@ interface UploadFormProps {
 }
 
 export function UploadForm({ open, onOpenChange }: UploadFormProps) {
+  const { generateISRC, generateUPC, codeGenerationSettings } = useAdminContext();
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
@@ -103,6 +104,20 @@ export function UploadForm({ open, onOpenChange }: UploadFormProps) {
     }
 
     setIsSubmitting(true);
+
+    // Auto-generate ISRC if not provided and auto-generation is enabled
+    if (!values.isrcCode && codeGenerationSettings.isrc.autoGenerate) {
+      const generatedISRC = generateISRC();
+      form.setValue('isrcCode', generatedISRC);
+      values.isrcCode = generatedISRC;
+    }
+
+    // Auto-generate UPC if not provided and auto-generation is enabled
+    if (!values.upcCode && codeGenerationSettings.upc.autoGenerate) {
+      const generatedUPC = generateUPC();
+      form.setValue('upcCode', generatedUPC);
+      values.upcCode = generatedUPC;
+    }
 
     // Simulate upload delay
     setTimeout(() => {
