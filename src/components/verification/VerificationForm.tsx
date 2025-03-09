@@ -6,20 +6,32 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
-import { Button } from '@/components/ui-extensions/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-extensions/Card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AccountTypeSelection } from './AccountTypeSelection';
 import { PersonalIdUpload } from './PersonalIdUpload';
 import { BusinessDocumentsUpload } from './BusinessDocumentsUpload';
 import { toast } from 'sonner';
 
+// Maximum file size: 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+
+const fileSchema = z.instanceof(File)
+  .refine(file => file.size <= MAX_FILE_SIZE, {
+    message: `File size must be less than 5MB`,
+  })
+  .refine(file => ACCEPTED_FILE_TYPES.includes(file.type), {
+    message: `File must be one of the following types: JPEG, PNG, or PDF`,
+  });
+
 export const verificationSchema = z.object({
   idType: z.enum(['personal', 'business'], {
     required_error: 'You need to select an ID type',
   }),
-  personalId: z.instanceof(File).optional(),
-  businessDocument: z.instanceof(File).optional(),
-  taxDocument: z.instanceof(File).optional(),
+  personalId: fileSchema.optional(),
+  businessDocument: fileSchema.optional(),
+  taxDocument: fileSchema.optional(),
 })
 .refine(data => {
   if (data.idType === 'personal') {
@@ -71,6 +83,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   const [personalIdFile, setPersonalIdFile] = useState<File | null>(null);
   const [businessDocFile, setBusinessDocFile] = useState<File | null>(null);
   const [taxDocFile, setTaxDocFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   
   const form = useForm<VerificationValues>({
     resolver: zodResolver(verificationSchema),
@@ -81,9 +94,29 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   
   const watchIdType = form.watch('idType');
 
+  const validateFile = (file: File): boolean => {
+    if (file.size > MAX_FILE_SIZE) {
+      setFileError(`File ${file.name} is too large. Maximum size is 5MB.`);
+      return false;
+    }
+    
+    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+      setFileError(`File ${file.name} has an invalid format. Accepted formats are JPEG, PNG, and PDF.`);
+      return false;
+    }
+    
+    setFileError(null);
+    return true;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      if (!validateFile(file)) {
+        e.target.value = '';
+        return;
+      }
       
       if (fieldName === 'personalId') {
         setPersonalIdFile(file);
@@ -100,6 +133,29 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
 
   const onSubmit = (data: VerificationValues) => {
     try {
+      // Additional validation before submission
+      if (data.idType === 'personal' && !data.personalId) {
+        toast.error('Personal ID is required');
+        return;
+      }
+      
+      if (data.idType === 'business') {
+        if (!data.businessDocument) {
+          toast.error('Business document is required');
+          return;
+        }
+        
+        if (!data.taxDocument) {
+          toast.error('Tax document is required');
+          return;
+        }
+        
+        if (!data.personalId) {
+          toast.error('Representative ID is required');
+          return;
+        }
+      }
+      
       const idDocument = data.personalId ? URL.createObjectURL(data.personalId) : '';
       const businessDocument = data.businessDocument ? URL.createObjectURL(data.businessDocument) : '';
       const taxDocument = data.taxDocument ? URL.createObjectURL(data.taxDocument) : '';
@@ -111,12 +167,14 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
         taxDocument
       );
       
+      toast.success('Documents submitted successfully');
       form.reset();
       setPersonalIdFile(null);
       setBusinessDocFile(null);
       setTaxDocFile(null);
     } catch (error) {
       toast.error('Error uploading verification documents');
+      console.error('Upload error:', error);
     }
   };
 
@@ -132,6 +190,13 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <AccountTypeSelection form={form} />
+            
+            {fileError && (
+              <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{fileError}</AlertDescription>
+              </Alert>
+            )}
             
             {watchIdType === 'personal' && (
               <PersonalIdUpload 
@@ -162,7 +227,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
             
             <Button 
               type="submit" 
-              disabled={user?.verificationStatus === 'pending'}
+              disabled={user?.verificationStatus === 'pending' || !!fileError}
             >
               Submit for Verification
             </Button>
