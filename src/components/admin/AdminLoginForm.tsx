@@ -1,79 +1,85 @@
 
 import { useState } from 'react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
-import { ShieldCheck, Key } from 'lucide-react';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { toast } from 'sonner';
+import { Lock, Shield, LogIn } from 'lucide-react';
 
-const adminLoginSchema = z.object({
+// Login Form Schema
+const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string().min(1, 'Password is required'),
 });
 
+// OTP Form Schema
 const otpSchema = z.object({
-  otp: z.string().min(6, 'OTP must be 6 digits').max(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only numbers'),
+  otp: z.string().length(6, 'OTP must be 6 digits'),
 });
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+type OtpFormValues = z.infer<typeof otpSchema>;
 
 export function AdminLoginForm() {
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [showOTPInput, setShowOTPInput] = useState(false);
+  const { adminLogin, verifyAdminOTP, adminOTPRequired } = useAuth();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { adminLogin, verifyAdminOTP } = useAuth();
 
-  const loginForm = useForm<z.infer<typeof adminLoginSchema>>({
-    resolver: zodResolver(adminLoginSchema),
+  // Login form
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       username: '',
       password: '',
     },
   });
 
-  const otpForm = useForm<z.infer<typeof otpSchema>>({
+  // OTP form
+  const otpForm = useForm<OtpFormValues>({
     resolver: zodResolver(otpSchema),
     defaultValues: {
       otp: '',
     },
   });
 
-  const onLoginSubmit = async (values: z.infer<typeof adminLoginSchema>) => {
-    setIsLoggingIn(true);
-    
+  // Handle login submission
+  const onLoginSubmit = async (data: LoginFormValues) => {
+    setIsLoading(true);
     try {
-      await adminLogin(values.username, values.password);
-      setShowOTPInput(true);
-      otpForm.reset(); // Reset OTP form when showing it
-      toast.success('OTP sent to your registered email/WhatsApp');
+      await adminLogin(data.username, data.password);
+      toast.success('Please enter the OTP sent to your registered device');
     } catch (error) {
-      toast.error('Login failed. Please check your credentials.');
+      console.error('Login error:', error);
+      toast.error('Invalid credentials');
     } finally {
-      setIsLoggingIn(false);
+      setIsLoading(false);
     }
   };
 
-  const onOTPSubmit = async (values: z.infer<typeof otpSchema>) => {
-    setIsLoggingIn(true);
-    
+  // Handle OTP submission
+  const onOtpSubmit = async (data: OtpFormValues) => {
+    setIsLoading(true);
     try {
-      await verifyAdminOTP(values.otp);
+      await verifyAdminOTP(data.otp);
       toast.success('Login successful!');
       navigate('/admin/dashboard');
     } catch (error) {
-      toast.error('Invalid OTP. Please try again.');
+      console.error('OTP error:', error);
+      toast.error('Invalid OTP code');
     } finally {
-      setIsLoggingIn(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      {!showOTPInput ? (
+    <div>
+      {!adminOTPRequired ? (
+        // Login form
         <Form {...loginForm}>
           <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
             <FormField
@@ -81,12 +87,12 @@ export function AdminLoginForm() {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Admin Username</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter admin username"
-                      autoComplete="username"
-                      {...field}
+                    <Input 
+                      placeholder="Enter your admin username" 
+                      {...field} 
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -100,11 +106,11 @@ export function AdminLoginForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="••••••••"
-                      type="password"
-                      autoComplete="current-password"
-                      {...field}
+                    <Input 
+                      type="password" 
+                      placeholder="Enter your password" 
+                      {...field} 
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -114,19 +120,24 @@ export function AdminLoginForm() {
             <Button 
               type="submit" 
               className="w-full" 
-              isLoading={isLoggingIn}
-              leftIcon={<ShieldCheck className="h-4 w-4" />}
+              disabled={isLoading}
+              leftIcon={<LogIn className="h-4 w-4" />}
             >
-              Admin Sign In
+              {isLoading ? 'Signing in...' : 'Admin Sign In'}
             </Button>
           </form>
         </Form>
       ) : (
+        // OTP verification form
         <Form {...otpForm}>
-          <form onSubmit={otpForm.handleSubmit(onOTPSubmit)} className="space-y-4">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
-              <p className="text-yellow-800 text-sm">
-                A verification code has been sent to your registered email/WhatsApp. Please enter it below to continue.
+          <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-4">
+            <div className="flex justify-center mb-4">
+              <Shield className="h-12 w-12 text-primary" />
+            </div>
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-medium">Two-Factor Authentication</h3>
+              <p className="text-muted-foreground text-sm">
+                Enter the 6-digit code sent to your registered device
               </p>
             </div>
             <FormField
@@ -134,20 +145,13 @@ export function AdminLoginForm() {
               name="otp"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Verification Code (OTP)</FormLabel>
                   <FormControl>
-                    <InputOTP 
+                    <Input 
+                      placeholder="Enter 6-digit OTP" 
+                      {...field} 
+                      disabled={isLoading}
                       maxLength={6}
-                      pattern="\d*"
-                      value={field.value}
-                      onChange={field.onChange}
-                      render={({ slots }) => (
-                        <InputOTPGroup>
-                          {slots.map((slot, index) => (
-                            <InputOTPSlot key={index} index={index} />
-                          ))}
-                        </InputOTPGroup>
-                      )}
+                      className="text-center text-xl tracking-widest"
                     />
                   </FormControl>
                   <FormMessage />
@@ -157,10 +161,10 @@ export function AdminLoginForm() {
             <Button 
               type="submit" 
               className="w-full" 
-              isLoading={isLoggingIn}
-              leftIcon={<Key className="h-4 w-4" />}
+              disabled={isLoading}
+              leftIcon={<Lock className="h-4 w-4" />}
             >
-              Verify & Login
+              {isLoading ? 'Verifying...' : 'Verify OTP'}
             </Button>
           </form>
         </Form>
