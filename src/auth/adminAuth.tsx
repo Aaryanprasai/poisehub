@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { User } from '@/lib/types';
+import { toast } from 'sonner';
 
 export function useAdminAuth(setUser: React.Dispatch<React.SetStateAction<User | null>>) {
   const [adminOTPRequired, setAdminOTPRequired] = useState<boolean>(false);
@@ -46,6 +47,7 @@ export function useAdminAuth(setUser: React.Dispatch<React.SetStateAction<User |
         
         setUser(adminUser);
         setAdminOTPRequired(false);
+        toast.success('Admin login successful');
       } else {
         throw new Error('Invalid OTP');
       }

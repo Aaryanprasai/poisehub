@@ -26,16 +26,16 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type OtpFormValues = z.infer<typeof otpSchema>;
 
 export function AdminLoginForm() {
-  const { adminLogin, verifyAdminOTP, adminOTPRequired, isAuthenticated } = useAuth();
+  const { adminLogin, verifyAdminOTP, adminOTPRequired, isAuthenticated, isAdmin } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
   // Check if user is authenticated and redirect if needed
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && isAdmin()) {
       navigate('/admin/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isAdmin, navigate]);
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -74,7 +74,7 @@ export function AdminLoginForm() {
     try {
       await verifyAdminOTP(data.otp);
       toast.success('Login successful!');
-      // The useEffect above will handle the redirect
+      navigate('/admin/dashboard');
     } catch (error) {
       console.error('OTP error:', error);
       toast.error('Invalid OTP code');

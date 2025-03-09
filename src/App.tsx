@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { AdminProvider } from './contexts/AdminContext';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
@@ -32,6 +31,7 @@ function AppContent() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -47,21 +47,15 @@ function AppContent() {
 
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLogin />} />
-      <Route path="/admin/*" element={
-        <AdminProtectedRoute>
-          <Routes>
-            <Route path="/dashboard" element={<AdminDashboard />} />
-            <Route path="/users" element={<AdminUsers />} />
-            <Route path="/tracks" element={<AdminTracks />} />
-            <Route path="/create-admin" element={<AdminCreate />} />
-            <Route path="/platforms-settings" element={<AdminPlatformsSettings />} />
-            <Route path="/tickets" element={<AdminTickets />} />
-            <Route path="/royalties" element={<AdminRoyalties />} />
-            <Route path="/deletion-requests" element={<AdminDeletionRequests />} />
-            <Route path="/settings" element={<AdminSettings />} />
-          </Routes>
-        </AdminProtectedRoute>
-      } />
+      <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+      <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
+      <Route path="/admin/tracks" element={<AdminProtectedRoute><AdminTracks /></AdminProtectedRoute>} />
+      <Route path="/admin/create-admin" element={<AdminProtectedRoute><AdminCreate /></AdminProtectedRoute>} />
+      <Route path="/admin/platforms-settings" element={<AdminProtectedRoute><AdminPlatformsSettings /></AdminProtectedRoute>} />
+      <Route path="/admin/tickets" element={<AdminProtectedRoute><AdminTickets /></AdminProtectedRoute>} />
+      <Route path="/admin/royalties" element={<AdminProtectedRoute><AdminRoyalties /></AdminProtectedRoute>} />
+      <Route path="/admin/deletion-requests" element={<AdminProtectedRoute><AdminDeletionRequests /></AdminProtectedRoute>} />
+      <Route path="/admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
     </Routes>
   );
 }

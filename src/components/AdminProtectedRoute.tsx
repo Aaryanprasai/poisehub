@@ -10,8 +10,12 @@ interface AdminProtectedRouteProps {
 const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isAdmin } = useAuth();
 
-  if (!isAuthenticated || !isAdmin()) {
+  if (!isAuthenticated) {
     return <Navigate to="/admin" replace />;
+  }
+
+  if (!isAdmin()) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
