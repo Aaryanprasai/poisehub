@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui-extensions/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAdminContext } from '@/contexts/AdminContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Lock, Shield, LogIn } from 'lucide-react';
 
@@ -26,9 +26,16 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type OtpFormValues = z.infer<typeof otpSchema>;
 
 export function AdminLoginForm() {
-  const { adminLogin, verifyAdminOTP, adminOTPRequired } = useAdminContext();
+  const { adminLogin, verifyAdminOTP, adminOTPRequired, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+
+  // Check if user is authenticated and redirect if needed
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/admin/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
